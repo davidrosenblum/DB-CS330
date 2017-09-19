@@ -6,6 +6,7 @@ let fs = require("fs"),                 // file system
     express = require("express"),       // express (http server)
     mysql = require("mysql");           // mysql database driver
 
+// default settings object
 let DEFAULT_SETTINGS = {
     host:           "0.0.0.0",
     http_port:      80,
@@ -16,20 +17,22 @@ let DEFAULT_SETTINGS = {
     mysql_port:     3306
 };
 
-let allSockets =    {},
-    lastSocketID =  0,  // unique id for sockets
-    settings =      null,
-    database =      null;
+let lastSocketID =  0,      // unique id for sockets
+    settings =      null,   // settings object
+    database =      null;   // database connection object
 
 // create the http server
 let app = express();
 
+// http server's files folder (the client-side file folder)
 app.use("/", express.static(__dirname + "/public"));
 
+// route http get requests to the host and send the index file
 app.route("/").get((req, res) => {
     res.sendFile("index.html");
 });
 
+// REST API functionality, give accounts JSON
 app.route("/database/accounts*").get((req, res) => {
     database.query("SELECT * FROM test.accounts", (err, rows) => {
         res.writeHead(200);
@@ -37,6 +40,7 @@ app.route("/database/accounts*").get((req, res) => {
     });
 });
 
+// REST API functionality, give associations JSON
 app.route("/database/associations*").get((req, res) => {
     database.query("SELECT * FROM test.assocations", (err, rows) => {
         res.writeHead(200);
@@ -44,6 +48,7 @@ app.route("/database/associations*").get((req, res) => {
     });
 });
 
+// REST API functionality, give ingredients JSON
 app.route("/database/ingredients*").get((req, res) => {
     database.query("SELECT * FROM test.ingredients", (err, rows) => {
         res.writeHead(200);
@@ -55,8 +60,6 @@ app.route("/database/ingredients*").get((req, res) => {
 let server = ws.createServer(socket => {
     // socket connected
     socket.id = ++lastSocketID;
-    allSockets[socket.id] = socket;
-
     console.log("Socket-" + socket.id + " connected.");
 
 
@@ -64,22 +67,21 @@ let server = ws.createServer(socket => {
     socket.on("text", data => handleSocketData(socket, data));
 
     // socket disconnected...
-    socket.on("close", () => {
-        console.log("Socket-" + socket.id + " disconnected.");
-        delete allSockets[socket.id];
-    });
+    socket.on("close", () => console.log("Socket-" + socket.id + " disconnected."));
 
+    // socket error...
     socket.on("error", err => console.log("Socket error."));
 });
 
 // websocket server on listening handler
-server.on("listening", () => {
-    console.log("WS server listening on " + settings.host + ":" + settings.ws_port + ".");
-});
+server.on("listening", () => console.log("WS server listening on " + settings.host + ":" + settings.ws_port + "."));
 
-server.on("error", (err) => console.log("WS ERR."));
+// handler for when the ws server has an error
+server.on("error", err => console.log("Websocket server error.\n" + err.message));
 
+// handler for when a socket submits a request
 let handleSocketData = (socket, text) => {
+    // parse the socket data
     let type, data;
     try{
         let json = JSON.parse(text);
@@ -87,23 +89,33 @@ let handleSocketData = (socket, text) => {
         data = json.data || null;
 
         if(!type || !data){
-            throw new Error("Invalid request.");
+            // json formatted wrong
+            throw new Error("Invalid request - type or data is invalid or missing.");
         }
     }
     catch(err){
+        // bad request (prob json parse err)
         socket.send(err.message);
         return;
     }
 
+    // request parsed
     handleRequest(socket, type, data);
 };
 
 let handleRequest = (socket, type, data) => {
+    // determine the function the socket is requesting
     if(type === "name"){
         searchByName(socket, data);
     }
     else if(type === "like"){
         searchLikeName(socket, data);
+    }
+    else if(type === "associate"){
+        socket.send("\"Associate feature not yet implemented.\"");
+    }
+    else if(type === "add"){
+        socket.send("\"Add feature not yet implemented.\"");
     }
     else{
         socket.send("Bad request.");
@@ -111,14 +123,17 @@ let handleRequest = (socket, type, data) => {
 };
 
 let searchByName = (socket, data) => {
+    // sql query
     database.query(
         "SELECT * FROM test.ingredients " +
         "WHERE name = '" + data + "' LIMIT 1",
         (err, rows) => {
             if(err || rows.length < 1){
+                // invalid response
                 socket.send("No results found for \"" + data + "\".");
             }
             else{
+                // success, respond to the socket
                 socket.send(JSON.stringify(rows[0]));
             }
         }
@@ -126,6 +141,7 @@ let searchByName = (socket, data) => {
 };
 
 let searchLikeName = (socket, data) => {
+    // sql query
     database.query(
         "SELECT test.ingredients.name " +
         "FROM test.associations " +
@@ -134,17 +150,21 @@ let searchLikeName = (socket, data) => {
         "AND test.ingredients.id = test.associations.associateID ",
         (err, rows) => {
             if(err || rows.length < 1){
+                // invalid response
                 if(err) console.log(err);
                 socket.send("No assocations found for \"" + data + "\".");
             }
             else{
+                // success, respond to the socket
                 socket.send(JSON.stringify(rows));
             }
         }
     );
 };
 
+// adds an ingredient to the database
 let addIngredient = (socket, data) => {
+    // create the sql query
     let query = "INSERT INTO test.ingredients";
         params = "(",
         values = "(";
@@ -157,6 +177,7 @@ let addIngredient = (socket, data) => {
     params = params.substring(0, params.length - 2) + ")";
     values = values.substring(0, values.length - 2) + ")";
 
+    // respond to the socket
     database.query(query, err => {
         socket.send((err) ? err.message : "Ingredient added.");
     });
@@ -170,6 +191,7 @@ let openDBThenServer = (callback) => {
     // make sure settings is not null
     settings = null ? DEFAULT_SETTINGS : settings;
 
+    // setup the mysql connection
     database = mysql.createConnection({
         host:       settings.mysql_host,
         port:       settings.mysql_port,
@@ -177,12 +199,15 @@ let openDBThenServer = (callback) => {
         password:   settings.mysql_password
     });
 
+    // connect to the database
     database.connect(err => {
         if(err){
+            // database failed to connect
             console.log(err.message);
-            process.exit();
+            //process.exit();
         }
         else{
+            // database connected, open the ws/http server and create the DB (if it doesnt exist)
             createDB();
             console.log("Database connected.");
             openServer();
@@ -198,10 +223,12 @@ let openServer = () => {
     // open the http server
     app.listen(settings.http_port, settings.host, (err) => {
         if(err){
+            // http server failed to open
             console.log("HTTP server error:\n" + err.message);
             process.exit();
         }
         else{
+            // http server opened
             console.log("HTTP server listening on " + settings.host + ":" + settings.http_port + ".");
         }
     });
@@ -243,9 +270,12 @@ let readSettings = (callback) => {
     });
 };
 
+// creates the database and tables
 let createDB = () => {
+    // create the database
     database.query("CREATE DATABASE IF NOT EXISTS test", (err) => {
         if(!err){
+            // create accounts table
             database.query(
                 "CREATE TABLE IF NOT EXISTS test.accounts(" +
                     "id INT AUTO_INCREMENT UNIQUE NOT NULL, " +
@@ -255,6 +285,7 @@ let createDB = () => {
                 ")"
             );
 
+            // create ingredients table
             database.query(
                 "CREATE TABLE IF NOT EXISTS test.ingredients(" +
                     "id INT AUTO_INCREMENT UNIQUE NOT NULL, " +
@@ -271,6 +302,7 @@ let createDB = () => {
                 ")"
             );
 
+            // create the associations table
             database.query(
                 "CREATE TABLE IF NOT EXISTS test.associations(" +
                     "id INT AUTO_INCREMENT UNIQUE NOT NULL, " +
@@ -299,11 +331,13 @@ let createDB = () => {
 
 // initializes the entire server
 let init = () => {
+    // read the settings file
     console.log("Loading settings...");
     readSettings(err => {
-        // settings loaded
+        // settings loaded (uses settings file OR defaults)
         (err) ? console.log("Using default settings.") : console.log("Settings loaded.");
 
+        // connect to the database then open the http/ws servers
         console.log("Connecting to database...");
         openDBThenServer();
     });

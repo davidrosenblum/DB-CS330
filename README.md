@@ -1,4 +1,4 @@
-# DB Project
+# Cuisine Crusaders
 
 ## Setup
 
@@ -54,3 +54,15 @@ __Settings.json__ file - created when server is first launched witih default val
 | like         | "name string" | Retrieves all associates for the given ingredient        |
 | add          | params json   | Adds an ingredient to the database                       |
 | associate    | "name1,name2" | Associates 2 ingredients with each other                 |
+
+
+## Client Query Strings
+
+Query strings go in the URL, sample below
+```
+http://www.foobar.com?test_mode=true&hello=world
+```
+
+| Paramter  | Value             | Description                                |
+|-----------|-------------------|--------------------------------------------|
+| test_mode | true              | Forces the webpage to connect to localhost |
