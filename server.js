@@ -127,15 +127,11 @@ let searchByName = (socket, data) => {
 
 let searchLikeName = (socket, data) => {
     database.query(
-        "SELECT name FROM ( " +
-            "(" +
-                "SELECT test.associations.sourceID, test.associations.associateID, test.ingredients.name " +
-                "FROM test.associations " +
-                "JOIN test.ingredients " +
-                "ON test.associations.sourceID = (SELECT id FROM test.ingredients WHERE name = '" + data + "' LIMIT 1) " +
-                "AND test.ingredients.id = test.associations.associateID " +
-            ") AS search " +
-        ")",
+        "SELECT test.ingredients.name " +
+        "FROM test.associations " +
+        "JOIN test.ingredients " +
+        "ON test.associations.sourceID = (SELECT id FROM test.ingredients WHERE name = '" + data + "' LIMIT 1) " +
+        "AND test.ingredients.id = test.associations.associateID ",
         (err, rows) => {
             if(err || rows.length < 1){
                 if(err) console.log(err);
