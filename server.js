@@ -56,6 +56,12 @@ app.route("/database/ingredients*").get((req, res) => {
     });
 });
 
+// REST API functionality, give DB connection state
+app.route("/database").get((req, res) => {
+    res.writeHead(200);
+    res.end("Database state = " + database.state);
+});
+
 // create the websocket server
 let server = ws.createServer(socket => {
     // socket connected
@@ -205,6 +211,7 @@ let openDBThenServer = (callback) => {
             // database failed to connect
             console.log(err.message);
             //process.exit();
+            openServer();
         }
         else{
             // database connected, open the ws/http server and create the DB (if it doesnt exist)
