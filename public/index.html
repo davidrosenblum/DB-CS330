@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Item Search</title>
+    <link href="css/stylesheet.css" rel="stylesheet" type="text/css"/>
+    <script src="js/main.js"></script>
+</head>
+<body>
+    <div id="wrapper">
+        <header>
+            TEST CLIENT
+        </header>
+        <nav>
+            <!-- other pages? -->
+        </nav>
+        <main>
+            <div id="search-container" class="outer-contianer">
+                <div class="inner-container">
+                    <div class="center-div">Search For Ingredients</div>
+                    <table class="tbl" align="center">
+                        <tbody>
+                            <tr>
+                                <td>Flavor</td>
+                                <td>
+                                    <select id="flavor-input" class="input-select">
+                                        <option>(Ignore)</option>
+                                        <option>Sweet</option>
+                                        <option>Sour</option>
+                                        <option>Hot</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Weight</td>
+                                <td>
+                                    <select id="weight-input" class="input-select">
+                                        <option>(Ignore)</option>
+                                        <option>Light</option>
+                                        <option>Medium</option>
+                                        <option>Heavy</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Season</td>
+                                <td>
+                                    <select id="season-input" class="input-select">
+                                        <option>(Ignore)</option>
+                                        <option>Winter</option>
+                                        <option>Spring</option>
+                                        <option>Summer</option>
+                                        <option>Fall</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Protein (g)</td>
+                                <td>
+                                    <input class="input-number" type="number" min="-1" max="100" value="">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Calories:</td>
+                                <td>
+                                    <input class="input-number" type="number" min="-1" max="999" value="">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="center-div">
+                        <button id="search-fields" class="search-btn">Search</button>
+                    </div>
+                </div>
+                <div class="inner-container">
+                    <div class="center-div">Search Ingredints Like</div>
+                    <p>
+                        Name:
+                        <input id="name-like-input" class="input-text" type="text" placeholder="Type name here." maxlength="25">
+                    </p>
+                    <div class="center-div">
+                        <button id="search-like" class="search-btn">Search</button>
+                    </div>
+                </div>
+                <div class="inner-container">
+                    <div class="center-div">Search Ingredient Information</div>
+                    <p>
+                        Name:
+                        <input id="name-input" class="input-text" type="text" placeholder="Type name here." maxlength="25">
+                    </p>
+                    <div class="center-div">
+                        <button id="search-name" class="search-btn">Search</button>
+                    </div>
+                </div>
+                <div id="results-container" class="inner-container">
+
+                </div>
+        </main>
+    </div>
+</body>
+</html>
