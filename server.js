@@ -63,8 +63,14 @@ app.route("/database").get((req, res) => {
     res.end("Database state = " + database.state);
 });
 
+// websocket configuration
+let serverConfig = {
+    secure: false,
+    validProtocols: ["ws:", "wss:"]
+};
+
 // create the websocket server
-let server = ws.createServer(socket => {
+let server = ws.createServer(serverConfig, socket => {
     // socket connected
     socket.id = ++lastSocketID;
     console.log("Socket-" + socket.id + " connected.");
