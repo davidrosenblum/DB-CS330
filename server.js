@@ -204,7 +204,7 @@ let openDBThenServer = (callback) => {
     // make sure settings is not null
     settings = null ? DEFAULT_SETTINGS : settings;
     // process env override
-    settings.http_port = ((process.env.PORT) ? process.env.PORT : settings.port);
+    settings.http_port = ((process.env.PORT) ? process.env.PORT : settings.http_port);
 
 
     // setup the mysql connection
