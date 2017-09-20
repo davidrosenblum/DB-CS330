@@ -1,80 +1,28 @@
 body{
-    background: linear-gradient(0deg, gray, white) fixed 100% 100%;
-    font-family: arial;
+    background: linear-gradient(180deg, white, gray) fixed 100% 100%;
 }
 
-#wrapper{
-
-}
-
-header{
-    text-align: center;
-    font-size: 1.5em;
-    text-shadow: 1px 1px red;
-}
-
-.inner-container{
-    margin: 5px;
-    background-color: white;
-    border: 1px solid black;
-    width: 350px;
-    margin: auto;
-    text-align: left;
-    padding: 10px;
-}
-
-.center-div{
-    padding: 5px;
-    text-align: center;
-}
-
-.tbl tr:nth-child(odd){
-    background-color: #CCCCAA;
-}
-
-.tbl tr:nth-child(even){
-    background-color: #CCCCCC;
-}
-
-.tbl td{
-    padding-left: 3px;
-    padding-right: 3px;
-    width: 100px;
-}
-
-.tbl td:nth-child(even){
-    text-align: center;
-}
-
-.input-number{
-    border: 1px solid black;
-    width: 75px;
-}
-
-.input-text{
-    border: 1px solid black;
-    width: 150px;
-}
-
-.input-select{
-    border: 1px solid black;
-    width: 90px;
-}
-
-.search-btn{
+#search-row button{
     background-size: 200% 100%;
-    background-image: linear-gradient(to right, lightgray 50%, red 50%);
+    background-image: linear-gradient(to right, white 50%, red 50%);
     border: 1px solid black;
     border-radius: 2px;
-    -webkit-transition: background-position 0.25s;
+    color: black;
+    transition: 0.25s;
 }
 
-.search-btn:hover{
-    color: white;
+#search-row button:hover{
     background-position: 100%;
 }
 
 #results-container{
-    text-align: center;
     display: none;
+    background-color: white;
+    margin-top: 50px;
+    padding: 10px;
+    width: 550px;
+    border-radius: 3px;
+    border: 1px solid black;
+    text-align: center;
+    box-shadow: 2px 2px black;
 }

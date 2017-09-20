@@ -61,8 +61,7 @@ var client = (function(){
         var qsRaw = window.location.href.split("?")[1] || null;
         if(!qsRaw){
             // no query strings
-            console.log("NO QS");
-            return;
+            return {};
         }
 
         var querystrings = {};
@@ -165,10 +164,38 @@ var client = (function(){
         });
     };
 
+    var showSearch = function(){
+        hideSearchContainers();
+
+        document.querySelector("#link-search").parentNode.classList.add("active");
+    };
+
+    var showSearchSimilar = function(){
+        hideSearchContainers();
+
+        document.querySelector("#link-search-similar").parentNode.classList.add("active");
+    };
+
+    var showIngredientInfo = function(){
+        hideSearchContainers();
+
+        document.querySelector("#link-ingredient-info").parentNode.classList.add("active");
+    };
+
+    var hideSearchContainers = function(){
+        document.querySelector("#link-search").parentNode.classList.remove("active");
+        document.querySelector("#link-search-similar").parentNode.classList.remove("active");
+        document.querySelector("#link-ingredient-info").parentNode.classList.remove("active");
+    };
+
     var init = function(){
         // create the Websocket
         createSocket();
 
+        // attach nav btn listesners
+        document.querySelector("#link-search").addEventListener("click", showSearch);
+        document.querySelector("#link-search-similar").addEventListener("click", showSearchSimilar);
+        document.querySelector("#link-ingredient-info").addEventListener("click", showIngredientInfo);
         // attach button click listeners
         document.querySelector("#search-like").addEventListener("click", searchLikeName);
         document.querySelector("#search-name").addEventListener("click", searchByName);
