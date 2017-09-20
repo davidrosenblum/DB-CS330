@@ -203,6 +203,9 @@ let searchByParams = (socket, data) => {
 let openDBThenServer = (callback) => {
     // make sure settings is not null
     settings = null ? DEFAULT_SETTINGS : settings;
+    // process env override
+    settings.http_port = ((process.env.PORT) ? process.env.PORT : settings.port);
+
 
     // setup the mysql connection
     database = mysql.createConnection({
