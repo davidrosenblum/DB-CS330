@@ -82,7 +82,7 @@ https://cuisine-crusader.herokuapp.com/database/ingredients
 
 Query strings go in the URL, sample below
 ```
-http://www.foobar.com?test_mode=true&hello=world
+https://cuisine-crusader.herokuapp.com/?test_mode=true
 ```
 
 | Paramter  | Value             | Description                                |
