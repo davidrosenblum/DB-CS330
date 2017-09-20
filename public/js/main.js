@@ -143,14 +143,15 @@ var client = (function(){
         // extract quert strings (determines socket endpoint)
         var querystrings = parseQueryStrings();
 
-        // test mode query string?
-        if(querystrings["test_mode"] === "true"){
-            // test mode
-            socket = new WebSocket("ws://" + TEST_HOST + ":" + WS_PORT);
+        // test mode query string? determine protocol and host
+        var host = (querystrings["test_mode"] === "true") ? TEST_HOST : SERVER_HOST,
+            protocol = (window.location.protocol === "https:") ? "wss://" : "ws://";
+
+        try{
+            socket = new WebSocket(protocol + host + ":" + WS_PORT);
         }
-        else{
-            // NOT test mode
-            socket = new WebSocket("ws://" + SERVER_HOST + ":" + WS_PORT);
+        catch(err){
+            console.log(err.message);
         }
 
         // socket connected...
