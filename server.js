@@ -14,7 +14,8 @@ let DEFAULT_SETTINGS = {
     mysql_host:     "127.0.0.1",
     mysql_user:     "root",
     mysql_password: "",
-    mysql_port:     3306
+    mysql_port:     3306,
+    mysql_database: "cuisine-crusader"
 };
 
 let lastSocketID =  0,      // unique id for sockets
@@ -33,16 +34,16 @@ app.route("/").get((req, res) => {
 });
 
 // REST API functionality, give accounts JSON
-app.route("/database/accounts*").get((req, res) => {
-    database.query("SELECT * FROM test.accounts", (err, rows) => {
+/*app.route("/database/accounts*").get((req, res) => {
+    database.query("SELECT * FROM accounts", (err, rows) => {
         res.writeHead(200);
         res.end(JSON.stringify(rows));
     });
-});
+});*/
 
 // REST API functionality, give associations JSON
 app.route("/database/associations*").get((req, res) => {
-    database.query("SELECT * FROM test.assocations", (err, rows) => {
+    database.query("SELECT * FROM assocations", (err, rows) => {
         res.writeHead(200);
         res.end(JSON.stringify(rows));
     });
@@ -50,7 +51,7 @@ app.route("/database/associations*").get((req, res) => {
 
 // REST API functionality, give ingredients JSON
 app.route("/database/ingredients*").get((req, res) => {
-    database.query("SELECT * FROM test.ingredients", (err, rows) => {
+    database.query("SELECT * FROM ingredients", (err, rows) => {
         res.writeHead(200);
         res.end(JSON.stringify(rows));
     });
@@ -83,7 +84,7 @@ let server = ws.createServer(socket => {
 server.on("listening", () => console.log("WS server listening on " + settings.host + ":" + settings.ws_port + "."));
 
 // handler for when the ws server has an error
-server.on("error", err => console.log("Websocket server error.\n" + err.message));
+server.on("error", err => console.log("WS server error.\n" + err.message));
 
 // handler for when a socket submits a request
 let handleSocketData = (socket, text) => {
@@ -110,6 +111,12 @@ let handleSocketData = (socket, text) => {
 };
 
 let handleRequest = (socket, type, data) => {
+    // node is not connected to database
+    if(database.state !== "authenticated"){
+        socket.send("Database is currently offline.");
+        return;
+    }
+
     // determine the function the socket is requesting
     if(type === "name"){
         searchByName(socket, data);
@@ -131,7 +138,7 @@ let handleRequest = (socket, type, data) => {
 let searchByName = (socket, data) => {
     // sql query
     database.query(
-        "SELECT * FROM test.ingredients " +
+        "SELECT * FROM ingredients " +
         "WHERE name = '" + data + "' LIMIT 1",
         (err, rows) => {
             if(err || rows.length < 1){
@@ -149,11 +156,11 @@ let searchByName = (socket, data) => {
 let searchLikeName = (socket, data) => {
     // sql query
     database.query(
-        "SELECT test.ingredients.name " +
-        "FROM test.associations " +
-        "JOIN test.ingredients " +
-        "ON test.associations.sourceID = (SELECT id FROM test.ingredients WHERE name = '" + data + "' LIMIT 1) " +
-        "AND test.ingredients.id = test.associations.associateID ",
+        "SELECT ingredients.name " +
+        "FROM associations " +
+        "JOIN ingredients " +
+        "ON associations.sourceID = (SELECT id FROM ingredients WHERE name = '" + data + "' LIMIT 1) " +
+        "AND ingredients.id = associations.associateID ",
         (err, rows) => {
             if(err || rows.length < 1){
                 // invalid response
@@ -171,7 +178,7 @@ let searchLikeName = (socket, data) => {
 // adds an ingredient to the database
 let addIngredient = (socket, data) => {
     // create the sql query
-    let query = "INSERT INTO test.ingredients";
+    let query = "INSERT INTO ingredients";
         params = "(",
         values = "(";
 
@@ -202,7 +209,8 @@ let openDBThenServer = (callback) => {
         host:       settings.mysql_host,
         port:       settings.mysql_port,
         user:       settings.mysql_user,
-        password:   settings.mysql_password
+        password:   settings.mysql_password,
+        database:   settings.mysql_database
     });
 
     // connect to the database
@@ -232,7 +240,7 @@ let openServer = () => {
         if(err){
             // http server failed to open
             console.log("HTTP server error:\n" + err.message);
-            process.exit();
+            //process.exit();
         }
         else{
             // http server opened
@@ -260,6 +268,7 @@ let readSettings = (callback) => {
         }
         else{
             // file NOT read - write the default
+            console.log("(Writing default settings file)");
             fs.writeFile("settings.json", JSON.stringify(DEFAULT_SETTINGS, null, 4));
         }
 
@@ -279,61 +288,61 @@ let readSettings = (callback) => {
 
 // creates the database and tables
 let createDB = () => {
-    // create the database
-    database.query("CREATE DATABASE IF NOT EXISTS test", (err) => {
-        if(!err){
-            // create accounts table
-            database.query(
-                "CREATE TABLE IF NOT EXISTS test.accounts(" +
-                    "id INT AUTO_INCREMENT UNIQUE NOT NULL, " +
-                    "username VARCHAR(25) UNIQUE NOT NULL, " +
-                    "password VARCHAR(25) UNIQUE NOT NULL, " +
-                    "PRIMARY KEY (id)" +
-                ")"
-            );
+    // create the database tables
+    /*database.query(
+        "CREATE TABLE IF NOT EXISTS accounts(" +
+            "id INT AUTO_INCREMENT UNIQUE NOT NULL, " +
+            "username VARCHAR(25) UNIQUE NOT NULL, " +
+            "password VARCHAR(25) UNIQUE NOT NULL, " +
+            "PRIMARY KEY (id)" +
+        ")",
+        err = {}
+    );*/
 
-            // create ingredients table
-            database.query(
-                "CREATE TABLE IF NOT EXISTS test.ingredients(" +
-                    "id INT AUTO_INCREMENT UNIQUE NOT NULL, " +
-                    "name VARCHAR(50) UNIQUE NOT NULL, " +
-                    "flavor ENUM('Sweet', 'Sour', 'Hot') NOT NULL, " +
-                    "weight ENUM('Heavy', 'Medium', 'Light') NOT NULL, " +
-                    "season ENUM('Summer', 'Spring', 'Winter', 'Fall') NOT NULL, " +
-                    "volume ENUM('Quiet', 'Moderate', 'Loud') NOT NULL, " +
-                    "calories INT, " +
-                    "calorieServing VARCHAR(255), " +
-                    "protein INT, " +
-                    "techniques VARCHAR(255), " +
-                    "PRIMARY KEY (id) " +
-                ")"
-            );
+    // create ingredients table
+    database.query(
+        "CREATE TABLE IF NOT EXISTS ingredients(" +
+            "id INT AUTO_INCREMENT UNIQUE NOT NULL, " +
+            "name VARCHAR(50) UNIQUE NOT NULL, " +
+            "flavor ENUM('Sweet', 'Sour', 'Hot') NOT NULL, " +
+            "weight ENUM('Heavy', 'Medium', 'Light') NOT NULL, " +
+            "season ENUM('Summer', 'Spring', 'Winter', 'Fall') NOT NULL, " +
+            "volume ENUM('Quiet', 'Moderate', 'Loud') NOT NULL, " +
+            "calories INT, " +
+            "calorieServing VARCHAR(255), " +
+            "protein INT, " +
+            "techniques VARCHAR(255), " +
+            "PRIMARY KEY (id) " +
+        ")",
+        err => {}
+    );
 
-            // create the associations table
-            database.query(
-                "CREATE TABLE IF NOT EXISTS test.associations(" +
-                    "id INT AUTO_INCREMENT UNIQUE NOT NULL, " +
-                    "sourceID INT NOT NULL, " +
-                    "associateID INT NOT NULL, " +
-                    "PRIMARY KEY (id), " +
-                    "FOREIGN KEY (sourceID) REFERENCES test.ingredients(id), " +
-                    "FOREIGN KEY (associateID) REFERENCES test.ingredients(id)" +
-                ")"
-            );
+    // create the associations table
+    database.query(
+        "CREATE TABLE IF NOT EXISTS associations(" +
+            /*"id INT AUTO_INCREMENT UNIQUE NOT NULL, " +*/
+            "sourceID INT NOT NULL, " +
+            "associateID INT NOT NULL, " +
+            "PRIMARY KEY (sourceID, associateID), " +
+            "FOREIGN KEY (sourceID) REFERENCES ingredients(id) ON DELETE CASCADE, " +
+            "FOREIGN KEY (associateID) REFERENCES ingredients(id) ON DELETE CASCADE" +
+        ")",
+        err => {}
+    );
 
-            database.query(
-                "INSERT INTO test.ingredients(name) " +
-                "VALUES('Jawa Juice'), ('Szechuan McNugget Sauce'), ('Blue Milk'), ('Earl Gray Tea')",
-                (err) => {}
-            );
+    // test ingredients
+    database.query(
+        "INSERT INTO ingredients(name) " +
+        "VALUES('Jawa Juice'), ('Szechuan McNugget Sauce'), ('Blue Milk'), ('Earl Gray Tea')",
+        err => {}
+    );
 
-            /*database.query(
-                "INSERT INTO test.associations(sourceID, associateID) " +
-                "VALUES(1,2), (1,3)",
-                (err) = {}
-            );*/
-        }
-    });
+    // test associations
+    database.query(
+        "INSERT INTO associations(sourceID, associateID) " +
+        "VALUES(1,2), (1,3)",
+        err => {}
+    );
 };
 
 // initializes the entire server
@@ -350,4 +359,5 @@ let init = () => {
     });
 };
 
+console.log("|-------------> Cuisine Crusader Server <-------------|");
 init();

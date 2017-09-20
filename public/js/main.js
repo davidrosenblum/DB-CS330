@@ -1,6 +1,6 @@
 var client = (function(){
     // connection setup
-    var SERVER_HOST =   "localhost",
+    var SERVER_HOST =   window.location.host.split(":")[0],
         TEST_HOST =     "localhost",
         WS_PORT =       9000;
 
@@ -9,6 +9,12 @@ var client = (function(){
 
     // sends a formatted json request through the socket
     var request = function(type, data){
+        // socket not connected
+        if(socket.readyState !== 1){
+            displayMessage("Websocket not connected.");
+            return;
+        }
+
         // create the json request
         var body = {
             type: type,

@@ -1,6 +1,8 @@
 # Cuisine Crusaders
 
-## Setup
+https://cuisine-crusader.herokuapp.com/
+
+## Local Setup
 
 Node & MySQL are required to launch the server
 
@@ -41,9 +43,29 @@ __Settings.json__ file - created when server is first launched witih default val
     "mysql_host": "127.0.0.1",
     "mysql_user": "root",
     "mysql_password": "",
-    "mysql_port": 3306
+    "mysql_port": 3306,
+    "mysql_database": "cuisine-crusader"
 }
 ```
+
+## REST API
+
+Current database connection state
+```
+https://cuisine-crusader.herokuapp.com/database
+```
+
+Association table as a JSON array
+```
+https://cuisine-crusader.herokuapp.com/database/associations
+```
+
+Ingredients table as a JSON array
+```
+https://cuisine-crusader.herokuapp.com/database/ingredients
+```
+
+
 
 ## WebSockets
 
