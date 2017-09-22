@@ -26,6 +26,8 @@ __JavaScript/Web IDE__ (any should be fine)
 * I like atom or sublime
 * https://atom.io/
 * https://www.sublimetext.com/3&#x5f
+* Visual Studio Code is also a good choice -RJ
+* https://code.visualstudio.com/
 
 __Github__
 * Git bash CLI
