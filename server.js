@@ -1,23 +1,16 @@
 "use strict";
 
-// import modules
+// import node modules
 let fs = require("fs"),                 // file system
     ws = require("nodejs-websocket"),   // websocket server
     express = require("express"),       // express (http server)
     mysql = require("mysql");           // mysql database driver
 
-// default settings object
-let DEFAULT_SETTINGS = {
-    host:           "0.0.0.0",
-    http_port:      80,
-    ws_port:        9000,
-    mysql_host:     "127.0.0.1",
-    mysql_user:     "root",
-    mysql_password: "",
-    mysql_port:     3306,
-    mysql_database: "cuisine-crusader"
-};
+// import local modules
+let Settings = require("./server_modules/Settings.js"), // settings utils
+    DatabaseManager = require("./server_modules/DatabaseManager.js");
 
+// fields
 let lastSocketID =  0,      // unique id for sockets
     settings =      null,   // settings object
     database =      null;   // database connection object
@@ -117,68 +110,59 @@ let handleSocketData = (socket, text) => {
 };
 
 let handleRequest = (socket, type, data) => {
-    // node is not connected to database
+    // node connected to db?
     if(database.state !== "authenticated"){
         socket.send("Database is currently offline.");
         return;
     }
 
     // determine the function the socket is requesting
-    if(type === "name"){
-        searchByName(socket, data);
+    if(type === "get-by-name"){
+        getByName(socket, data);
     }
-    else if(type === "like"){
-        searchLikeName(socket, data);
+    else if(type === "get-associations"){
+        getAssociations(socket, data);
     }
-    else if(type === "associate"){
+    else if(type === "get-by-params"){
+        socket.send("\"Paramater search feature not yet implemented.\"");
+    }
+    else if(type === "set-association"){
         socket.send("\"Associate feature not yet implemented.\"");
     }
-    else if(type === "add"){
+    else if(type === "add-ingredient"){
         socket.send("\"Add feature not yet implemented.\"");
     }
     else{
-        socket.send("Bad request.");
+        socket.send("Bad request type.");
     }
 };
 
-let searchByName = (socket, data) => {
-    // sql query
-    database.query(
-        "SELECT * FROM ingredients " +
-        "WHERE name = '" + data + "' LIMIT 1",
-        (err, rows) => {
-            if(err || rows.length < 1){
-                // invalid response
-                socket.send("No results found for \"" + data + "\".");
-            }
-            else{
-                // success, respond to the socket
-                socket.send(JSON.stringify(rows[0]));
-            }
+let getByName = (socket, data) => {
+    database.queryName(data, (err, rows) => {
+        if(err || rows.length < 1){
+            // invalid response
+            if(err) console.log(err);
+            socket.send("No results found for \"" + data + "\".");
         }
-    );
+        else{
+            // success, respond to the socket
+            socket.send(JSON.stringify(rows[0]));
+        }
+    });
 };
 
-let searchLikeName = (socket, data) => {
-    // sql query
-    database.query(
-        "SELECT ingredients.name " +
-        "FROM associations " +
-        "JOIN ingredients " +
-        "ON associations.sourceID = (SELECT id FROM ingredients WHERE name = '" + data + "' LIMIT 1) " +
-        "AND ingredients.id = associations.associateID ",
-        (err, rows) => {
-            if(err || rows.length < 1){
-                // invalid response
-                if(err) console.log(err);
-                socket.send("No assocations found for \"" + data + "\".");
-            }
-            else{
-                // success, respond to the socket
-                socket.send(JSON.stringify(rows));
-            }
+let getAssociations = (socket, data) => {
+    database.queryAssociates(data, (err, rows) => {
+        if(err || rows.length < 1){
+            // error or no result
+            if(err) console.log(err.message);
+            socket.send("No assocations found for \"" + data + "\".");
         }
-    );
+        else{
+            // success, send the results
+            socket.send(JSON.stringify(rows));
+        }
+    });
 };
 
 // adds an ingredient to the database
@@ -207,20 +191,7 @@ let searchByParams = (socket, data) => {
 };
 
 let openDBThenServer = (callback) => {
-    // make sure settings is not null
-    settings = null ? DEFAULT_SETTINGS : settings;
-    // process env override
-    settings.http_port = ((process.env.PORT) ? process.env.PORT : settings.http_port);
-
-
-    // setup the mysql connection
-    database = mysql.createConnection({
-        host:       settings.mysql_host,
-        port:       settings.mysql_port,
-        user:       settings.mysql_user,
-        password:   settings.mysql_password,
-        database:   settings.mysql_database
-    });
+    database = new DatabaseManager(settings);
 
     // connect to the database
     database.connect(err => {
@@ -232,7 +203,7 @@ let openDBThenServer = (callback) => {
         }
         else{
             // database connected, open the ws/http server and create the DB (if it doesnt exist)
-            createDB();
+            database.createTables();
             console.log("Database connected.");
             openServer();
         }
@@ -258,109 +229,17 @@ let openServer = () => {
     });
 };
 
-// reads the 'settings.json' file
-let readSettings = (callback) => {
-    // load the settings fille (async)...
-    fs.readFile("settings.json", (err, res) => {
-        settings = {};
-
-        if(!err){
-            // file read
-            try{
-                // attempt to parse the file
-                settings = JSON.parse(res);
-            }
-            catch(err){
-                // error parsing file - do nothing
-                // defaults will be loaded in next step
-            }
-        }
-        else{
-            // file NOT read - write the default
-            console.log("(Writing default settings file)");
-            fs.writeFile("settings.json", JSON.stringify(DEFAULT_SETTINGS, null, 4));
-        }
-
-        // add missing or invalid setting parameters
-        for(let opt in DEFAULT_SETTINGS){
-            if(typeof settings[opt] !== typeof DEFAULT_SETTINGS[opt]){
-                settings[opt] = DEFAULT_SETTINGS[opt];
-            }
-        }
-
-        // trigger optional callback
-        if(typeof callback === "function"){
-            callback(err, settings);
-        }
-    });
-};
-
-// creates the database and tables
-let createDB = () => {
-    // create the database tables
-    /*database.query(
-        "CREATE TABLE IF NOT EXISTS accounts(" +
-            "id INT AUTO_INCREMENT UNIQUE NOT NULL, " +
-            "username VARCHAR(25) UNIQUE NOT NULL, " +
-            "password VARCHAR(25) UNIQUE NOT NULL, " +
-            "PRIMARY KEY (id)" +
-        ")",
-        err = {}
-    );*/
-
-    // create ingredients table
-    database.query(
-        "CREATE TABLE IF NOT EXISTS ingredients(" +
-            "id INT AUTO_INCREMENT UNIQUE NOT NULL, " +
-            "name VARCHAR(50) UNIQUE NOT NULL, " +
-            "flavor ENUM('Sweet', 'Sour', 'Hot') NOT NULL, " +
-            "weight ENUM('Heavy', 'Medium', 'Light') NOT NULL, " +
-            "season ENUM('Summer', 'Spring', 'Winter', 'Fall') NOT NULL, " +
-            "volume ENUM('Quiet', 'Moderate', 'Loud') NOT NULL, " +
-            "calories INT, " +
-            "calorieServing VARCHAR(255), " +
-            "protein INT, " +
-            "techniques VARCHAR(255), " +
-            "PRIMARY KEY (id) " +
-        ")",
-        err => {}
-    );
-
-    // create the associations table
-    database.query(
-        "CREATE TABLE IF NOT EXISTS associations(" +
-            /*"id INT AUTO_INCREMENT UNIQUE NOT NULL, " +*/
-            "sourceID INT NOT NULL, " +
-            "associateID INT NOT NULL, " +
-            "PRIMARY KEY (sourceID, associateID), " +
-            "FOREIGN KEY (sourceID) REFERENCES ingredients(id) ON DELETE CASCADE, " +
-            "FOREIGN KEY (associateID) REFERENCES ingredients(id) ON DELETE CASCADE" +
-        ")",
-        err => {}
-    );
-
-    // test ingredients
-    database.query(
-        "INSERT INTO ingredients(name) " +
-        "VALUES('Jawa Juice'), ('Szechuan McNugget Sauce'), ('Blue Milk'), ('Earl Gray Tea')",
-        err => {}
-    );
-
-    // test associations
-    database.query(
-        "INSERT INTO associations(sourceID, associateID) " +
-        "VALUES(1,2), (1,3)",
-        err => {}
-    );
-};
-
 // initializes the entire server
 let init = () => {
     // read the settings file
     console.log("Loading settings...");
-    readSettings(err => {
+    Settings.readSettings((err, json) => {
         // settings loaded (uses settings file OR defaults)
         (err) ? console.log("Using default settings.") : console.log("Settings loaded.");
+        settings = json;
+
+        // process env override
+        settings.http_port = ((process.env.PORT) ? process.env.PORT : settings.http_port);
 
         // connect to the database then open the http/ws servers
         console.log("Connecting to database...");
