@@ -71,13 +71,13 @@ https://cuisine-crusader.herokuapp.com/database/ingredients
 
 ## WebSockets
 
-| Request Type | Data          | Description                                              |
-|--------------|---------------|----------------------------------------------------------|
-| name         | "name string" | Retrieves all rows for the given ingredient              |
-| search       | params json   | Retrieves all ingredients matching the search parameters |
-| like         | "name string" | Retrieves all associates for the given ingredient        |
-| add          | params json   | Adds an ingredient to the database                       |
-| associate    | "name1,name2" | Associates 2 ingredients with each other                 |
+| Request Type     | Data              | Result         | Description                                                   |
+|------------------|-------------------|----------------|---------------------------------------------------------------|
+| get-by-name      | "ingredient name" | ingredientJSON | Retrieves all rows for the given ingredient                   |
+| get-by-params    | ingredientJSON    | ["ingredient"] | Retrieves all ingredient names matching the search parameters |
+| get-associations | "ingredient name" | ["ingredient"] | Retrieves all association names for the given ingredient      |
+| set-association  | "name1, name2"    | "message"      | Associates 2 ingredients with each other                      |
+| add-ingredient   | ingredientJSON    | "message"      | Adds an ingredient to the database                            |
 
 
 ## Client Query Strings

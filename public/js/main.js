@@ -2,7 +2,7 @@ var client = (function(){
     // connection setup
     var SERVER_HOST =   window.location.host.split(":")[0], // extract the  host from the url
         TEST_HOST =     "localhost",                        // host for development (localhost)
-        WS_PORT =       9000;                               // websocket port 
+        WS_PORT =       9000;                               // websocket port
 
     // private websocket
     var socket = null;
@@ -32,7 +32,7 @@ var client = (function(){
     };
 
     // seach by name request (request type = 'name')
-    var searchByName = function(){
+    var getByName = function(){
         // get the name text from the html
         var name = document.querySelector("#name-input").value;
         if(!name){
@@ -43,11 +43,11 @@ var client = (function(){
 
         // send the request
         console.log("Name search requested.");
-        request("name", name);
+        request("get-by-name", name);
     };
 
     // search by association request (request type = 'like')
-    var searchLikeName = function(){
+    var getAssociations = function(){
         // get the name text from the html
         var name = document.querySelector("#name-like-input").value;
         if(!name){
@@ -57,8 +57,8 @@ var client = (function(){
         }
 
         // send the request
-        console.log("Name like requested.");
-        request("like", name);
+        console.log("Associations search requested.");
+        request("get-associations", name);
     };
 
     // parse the query strings from the url
@@ -169,6 +169,11 @@ var client = (function(){
             console.log("Websocket closed.");
 
         });
+
+        // socket error...
+        socket.addEventListener("error", function(evt){
+            console.log("Websocket error.");
+        });
     };
 
     var showSearch = function(){
@@ -204,8 +209,8 @@ var client = (function(){
         document.querySelector("#link-search-similar").addEventListener("click", showSearchSimilar);
         document.querySelector("#link-ingredient-info").addEventListener("click", showIngredientInfo);
         // attach button click listeners
-        document.querySelector("#search-like").addEventListener("click", searchLikeName);
-        document.querySelector("#search-name").addEventListener("click", searchByName);
+        document.querySelector("#search-like").addEventListener("click", getAssociations);
+        document.querySelector("#search-name").addEventListener("click", getByName);
     };
     window.addEventListener("load", init);
 })();
