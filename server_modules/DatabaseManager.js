@@ -28,11 +28,11 @@ let DatabaseManager = class DatabaseManager{
         this.conn.connect(callback);
     }
 
-    queryName(data, callback){
+    queryName(name, callback){
         // sql query
         this.query(
             "SELECT * FROM ingredients " +
-            "WHERE name = '" + data + "' LIMIT 1",
+            "WHERE name = '" + name + "' LIMIT 1",
             callback
         );
     }
@@ -50,22 +50,11 @@ let DatabaseManager = class DatabaseManager{
     }
 
     getIngredientsTableJSON(callback){
-        this.query("SELECT * FROM ingredients", (err, rows) => {
-            if(err || rows.length < 1){
-                
-            }
-        });
+        this.query("SELECT * FROM ingredients", callback);
     }
 
     getAssociationsTableJSON(callback){
-        this.query("SELECT * FROM associations", (err, rows) => {
-            if(!err){
-
-            }
-            else{
-
-            }
-        });
+        this.query("SELECT * FROM associations", callback);
     }
 
     createTables(){

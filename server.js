@@ -1,18 +1,16 @@
 "use strict";
 
 // import node modules
-let fs = require("fs"),                 // file system
-    ws = require("nodejs-websocket"),   // websocket server
-    express = require("express"),       // express (http server)
-    mysql = require("mysql");           // mysql database driver
+let fs = require("fs"),                             // file system
+    express = require("express"),                   // express (http server)
+    mysql = require("mysql");                       // mysql database driver
 
 // import local modules
-let Settings = require("./server_modules/Settings.js"), // settings utils
+let Settings = require("./server_modules/Settings.js"),
     DatabaseManager = require("./server_modules/DatabaseManager.js");
 
 // fields
-let lastSocketID =  0,      // unique id for sockets
-    settings =      null,   // settings object
+let settings =      null,   // settings object
     database =      null;   // database connection object
 
 // create the http server
@@ -26,145 +24,81 @@ app.route("/").get((req, res) => {
     res.sendFile("index.html");
 });
 
-// REST API functionality, give accounts JSON
-/*app.route("/database/accounts*").get((req, res) => {
-    database.query("SELECT * FROM accounts", (err, rows) => {
-        res.writeHead(200);
-        res.end(JSON.stringify(rows));
-    });
-});*/
-
-// REST API functionality, give associations JSON
-app.route("/database/associations*").get((req, res) => {
-    database.query("SELECT * FROM assocations", (err, rows) => {
-        res.writeHead(200);
-        res.end(JSON.stringify(rows));
-    });
-});
-
-// REST API functionality, give ingredients JSON
-app.route("/database/ingredients*").get((req, res) => {
-    database.query("SELECT * FROM ingredients", (err, rows) => {
-        res.writeHead(200);
-        res.end(JSON.stringify(rows));
-    });
-});
-
-// REST API functionality, give DB connection state
+// DB connection state requested
 app.route("/database").get((req, res) => {
     res.writeHead(200);
     res.end("Database state = " + database.state);
 });
 
-// websocket configuration
-let serverConfig = {
-    secure: false,
-    validProtocols: ["ws:", "wss:"]
-};
 
-// create the websocket server
-let server = ws.createServer(serverConfig, socket => {
-    // socket connected
-    socket.id = ++lastSocketID;
-    console.log("Socket-" + socket.id + " connected.");
-
-
-    // socket sent request...
-    socket.on("text", data => handleSocketData(socket, data));
-
-    // socket disconnected...
-    socket.on("close", () => console.log("Socket-" + socket.id + " disconnected."));
-
-    // socket error...
-    socket.on("error", err => console.log("Socket error."));
+// associations table JSON requested
+app.route("/associations/get").get((req, res) => {
+    database.getAssociationsTableJSON((err, rows) => {
+        res.writeHead(200);
+        res.end(JSON.stringify((rows || []), null, 2));
+    });
 });
 
-// websocket server on listening handler
-server.on("listening", () => console.log("WS server listening on " + settings.host + ":" + settings.ws_port + "."));
+// request assocations for ingredient by name
+app.route("/associations/name*").get((req, res) => {
+    // extract the name from the url
+    let name = extractUrlValue(req.url);
 
-// handler for when the ws server has an error
-server.on("error", err => console.log("WS server error.\n" + err.message));
+    database.queryAssociates(name, (err, rows) => {
+        if(!err && rows.length > 0){
+            // successful query
+            // convert [{name: "..."}] to ["..."]
+            let resultData = [];
+            for(var associate of rows){
+                resultData.push(associate.name);
+            }
 
-// handler for when a socket submits a request
-let handleSocketData = (socket, text) => {
-    // parse the socket data
-    let type, data;
-    try{
-        let json = JSON.parse(text);
-        type = json.type || null;
-        data = json.data || null;
-
-        if(!type || !data){
-            // json formatted wrong
-            throw new Error("Invalid request - type or data is invalid or missing.");
-        }
-    }
-    catch(err){
-        // bad request (prob json parse err)
-        socket.send(err.message);
-        return;
-    }
-
-    // request parsed
-    handleRequest(socket, type, data);
-};
-
-let handleRequest = (socket, type, data) => {
-    // node connected to db?
-    if(database.state !== "authenticated"){
-        socket.send("Database is currently offline.");
-        return;
-    }
-
-    // determine the function the socket is requesting
-    if(type === "get-by-name"){
-        getByName(socket, data);
-    }
-    else if(type === "get-associations"){
-        getAssociations(socket, data);
-    }
-    else if(type === "get-by-params"){
-        socket.send("\"Paramater search feature not yet implemented.\"");
-    }
-    else if(type === "set-association"){
-        socket.send("\"Associate feature not yet implemented.\"");
-    }
-    else if(type === "add-ingredient"){
-        socket.send("\"Add feature not yet implemented.\"");
-    }
-    else{
-        socket.send("Bad request type.");
-    }
-};
-
-let getByName = (socket, data) => {
-    database.queryName(data, (err, rows) => {
-        if(err || rows.length < 1){
-            // invalid response
-            if(err) console.log(err);
-            socket.send("No results found for \"" + data + "\".");
+            // respond
+            res.writeHead(200);
+            res.end(JSON.stringify(resultData, null, 2));
         }
         else{
-            // success, respond to the socket
-            socket.send(JSON.stringify(rows[0]));
+            // error or no data
+            res.writeHead(400);
+            res.end("No associations for \"" + name + "\".");
         }
     });
-};
+});
 
-let getAssociations = (socket, data) => {
-    database.queryAssociates(data, (err, rows) => {
-        if(err || rows.length < 1){
-            // error or no result
-            if(err) console.log(err.message);
-            socket.send("No assocations found for \"" + data + "\".");
+// ingredients table JSON requested
+app.route("/ingredients/get*").get((req, res) => {
+    database.getIngredientsTableJSON((err, rows) => {
+        res.writeHead(200);
+        res.end(JSON.stringify((rows || []), null, 2));
+    });
+});
+
+// get ingredient by name request
+app.route("/ingredients/name*").get((req, res) => {
+    let name = extractUrlValue(req.url);
+
+    database.queryName(name, (err, rows) => {
+        if(!err && rows.length > 0){
+            res.writeHead(200);
+            res.end(JSON.stringify(rows[0], null, 2));
         }
         else{
-            // success, send the results
-            socket.send(JSON.stringify(rows));
+            res.writeHead(400);
+            res.end("No results for \"" + name + "\".");
         }
     });
+});
+
+// extracts the name from the url
+let extractUrlValue = (url) => {
+    // ex: 'http://host/directory/hello_there' -> 'hello there'
+    let split = url.split("/"),
+        extract = split[split.length - 1];
+
+    return extract.replace(new RegExp("_", "g"), " ");
 };
 
+/* (FINISH IMPLEMENTATION!)
 // adds an ingredient to the database
 let addIngredient = (socket, data) => {
     // create the sql query
@@ -184,52 +118,10 @@ let addIngredient = (socket, data) => {
     database.query(query, err => {
         socket.send((err) ? err.message : "Ingredient added.");
     });
-};
-
-let searchByParams = (socket, data) => {
-    database.query();
-};
-
-let openDBThenServer = (callback) => {
-    database = new DatabaseManager(settings);
-
-    // connect to the database
-    database.connect(err => {
-        if(err){
-            // database failed to connect
-            console.log(err.message);
-            //process.exit();
-            openServer();
-        }
-        else{
-            // database connected, open the ws/http server and create the DB (if it doesnt exist)
-            database.createTables();
-            console.log("Database connected.");
-            openServer();
-        }
-    })
-};
-
-// open the http & ws servers
-let openServer = () => {
-    // open the websocket server
-    server.listen(settings.ws_port, settings.host);
-
-    // open the http server
-    app.listen(settings.http_port, settings.host, (err) => {
-        if(err){
-            // http server failed to open
-            console.log("HTTP server error:\n" + err.message);
-            //process.exit();
-        }
-        else{
-            // http server opened
-            console.log("HTTP server listening on " + settings.host + ":" + settings.http_port + ".");
-        }
-    });
-};
+};*/
 
 // initializes the entire server
+// scary async function... loads settings -> connects to DB -> opens HTTP server
 let init = () => {
     // read the settings file
     console.log("Loading settings...");
@@ -239,11 +131,37 @@ let init = () => {
         settings = json;
 
         // process env override
-        settings.http_port = ((process.env.PORT) ? process.env.PORT : settings.http_port);
+        settings.port = ((process.env.PORT) ? process.env.PORT : settings.port);
 
-        // connect to the database then open the http/ws servers
+        // connect to the database
         console.log("Connecting to database...");
-        openDBThenServer();
+
+        // connect to the database
+        database = new DatabaseManager(settings);
+        database.connect(err => {
+            if(err){
+                // database failed to connect
+                console.log(err.message);
+            }
+            else{
+                // database connected
+                database.createTables();
+                console.log("Database connected.");
+            }
+
+            // open the http server
+            app.listen(settings.port, settings.host, err => {
+                if(err){
+                    // http server failed to open
+                    console.log("HTTP server error:\n" + err.message);
+                    process.exit();
+                }
+                else{
+                    // http server opened
+                    console.log("HTTP server listening on " + settings.host + ":" + settings.port + ".");
+                }
+            });
+        });
     });
 };
 
