@@ -1,66 +1,4 @@
 var client = (function(){
-    // connection setup
-    var SERVER_HOST =   window.location.host.split(":")[0], // extract the  host from the url
-        TEST_HOST =     "localhost",                        // host for development (localhost)
-        WS_PORT =       9000;                               // websocket port
-
-    // private websocket
-    var socket = null;
-
-    // sends a formatted json request through the socket
-    var request = function(type, data){
-        // socket not connected
-        if(!socket || socket.readyState !== 1){
-            displayMessage("Websocket not connected.");
-            return;
-        }
-
-        // create the json request
-        var body = {
-            type: type,
-            data: data
-        };
-
-        try{
-            // send the request through the socket as a json string
-            socket.send(JSON.stringify(body));
-        }
-        catch(err){
-            // parse error
-            console.log("Error sending request (json parse error).");
-        }
-    };
-
-    // seach by name request (request type = 'name')
-    var getByName = function(){
-        // get the name text from the html
-        var name = document.querySelector("#name-input").value;
-        if(!name){
-            // input missing
-            displayMessage("Please enter a name.");
-            return;
-        }
-
-        // send the request
-        console.log("Name search requested.");
-        request("get-by-name", name);
-    };
-
-    // search by association request (request type = 'like')
-    var getAssociations = function(){
-        // get the name text from the html
-        var name = document.querySelector("#name-like-input").value;
-        if(!name){
-            // input missing
-            displayMessage("Please enter a name.");
-            return;
-        }
-
-        // send the request
-        console.log("Associations search requested.");
-        request("get-associations", name);
-    };
-
     // parse the query strings from the url
     var parseQueryStrings = function(){
         // extract the query string from the url
@@ -81,19 +19,36 @@ var client = (function(){
         return querystrings;
     };
 
-    // socket message handler
-    var handleSocketData = function(message){
-        try{
-            // attempt to parse
-            var json = JSON.parse(message);
+    var getByName = function(){
+        var name = document.querySelector("#name-input").value.replace(new RegExp(" ", "g"), "_");
+        if(name){
+            CCAPI.requestInfo(name, function(res, status){
+                (status === 200) ? displayData(JSON.parse(res)) : displayMessage(res);
+            });
+        }
+        else{
+            displayMessage("Please enter an ingredient name.");
+        }
+    };
 
-            // its json, display it
-            displayData(json);
+    var getAssociations = function(){
+        var name = document.querySelector("#name-like-input").value.replace(new RegExp(" ", "g"), "_");
+        if(name){
+            CCAPI.requestAssociations(name, function(res, status){
+                (status === 200) ? displayData(JSON.parse(res)) : displayMessage(res);
+            });
         }
-        catch(err){
-            // non-json, print the message
-            displayMessage(message);
+        else{
+            displayMessage("Please enter an ingredient name.");
         }
+    };
+
+    var getByParams = function(){
+        var flavor = document.querySelector("#input-flavor").value,
+            weight = document.querySelector("#input-weight").value,
+            season = document.querySelector("#input-season").value,
+            protein = document.querySelector("#input-protein").value,
+            calories = document.querySelector("#input-calories").value
     };
 
     // takes json data and determines if it should be table or list and injects into DOM
@@ -121,11 +76,11 @@ var client = (function(){
         displayMessage(html);
     };
 
-    // array to html list
+    // array to html list (comma seperated text)
     var displayList = function(data){
         var html = "";
         for(var i = 0; i < data.length; i++){
-            html += data[i].name + ", ";
+            html += "<a href='#'>" + data[i] + "</a>, ";
         }
 
         displayMessage(html.substring(0, html.length - 2));
@@ -136,44 +91,6 @@ var client = (function(){
         var container = document.querySelector("#results-container");
         container.style.display = "block";
         container.innerHTML = message;
-    };
-
-    // creates the websocket
-    var createSocket = function(){
-        // extract quert strings (determines socket endpoint)
-        var querystrings = parseQueryStrings();
-
-        // test mode query string? determine protocol and host
-        var host = (querystrings["test_mode"] === "true") ? TEST_HOST : SERVER_HOST,
-            protocol = (window.location.protocol === "https:") ? "wss://" : "ws://";
-
-        try{
-            socket = new WebSocket(protocol + host + ":" + WS_PORT);
-        }
-        catch(err){
-            console.log(err.message);
-        }
-
-        // socket connected...
-        socket.addEventListener("open", function(evt){
-            console.log("Websocket connected!");
-        });
-
-        // socket response...
-        socket.addEventListener("message", function(evt){
-            handleSocketData(evt.data);
-        });
-
-        // socket closed...
-        socket.addEventListener("close", function(evt){
-            console.log("Websocket closed.");
-
-        });
-
-        // socket error...
-        socket.addEventListener("error", function(evt){
-            console.log("Websocket error.");
-        });
     };
 
     var showSearch = function(){
@@ -201,9 +118,6 @@ var client = (function(){
     };
 
     var init = function(){
-        // create the Websocket
-        createSocket();
-
         // attach nav btn listesners
         document.querySelector("#link-search").addEventListener("click", showSearch);
         document.querySelector("#link-search-similar").addEventListener("click", showSearchSimilar);

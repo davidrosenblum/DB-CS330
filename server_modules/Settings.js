@@ -6,13 +6,12 @@ let fs = require("fs");
 // default settings object
 let DEFAULT_SETTINGS = {
     host:           "0.0.0.0",
-    http_port:      8080,
-    ws_port:        9000,
+    port:           8080,
     mysql_host:     "127.0.0.1",
     mysql_user:     "root",
     mysql_password: "",
     mysql_port:     3306,
-    mysql_database: "cuisine_crusader"
+    mysql_database: "cuisine-crusader"
 };
 
 let Settings = class Settings{

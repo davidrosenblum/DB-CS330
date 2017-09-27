@@ -39,15 +39,15 @@ __Settings.json__ file - created when server is first launched witih default val
 
 ```javascript
 {
-    "host": "0.0.0.0",
-    "http_port": 80,
-    "ws_port": 9000,
-    "mysql_host": "127.0.0.1",
-    "mysql_user": "root",
-    "mysql_password": "",
-    "mysql_port": 3306,
-    "mysql_database": "cuisine-crusader"
+    "host": 			"0.0.0.0",
+    "port": 			8080,
+    "mysql_host": 		"127.0.0.1",
+    "mysql_user": 		"root",
+    "mysql_password": 	"admin",
+    "mysql_port": 		3306,
+    "mysql_database": 	"cuisine_crusader"
 }
+
 ```
 
 ## REST API
@@ -57,36 +57,27 @@ Current database connection state
 https://cuisine-crusader.herokuapp.com/database
 ```
 
+Ingredient data from name
+```
+https://cuisine-crusader.herokuapp.com/ingredients/name/INGREDIENT_NAME
+```
+
+Assocations from an ingredient name
+```
+https://cuisine-crusader.herokuapp.com/associations/name/INGREDIENT_NAME
+```
+Search for ingredients by parameters
+```
+https://cuisine-crusader.herokuapp.com/ingredients/search
+(Search params JSON in request BODY!)
+```
+
 Association table as a JSON array
 ```
-https://cuisine-crusader.herokuapp.com/database/associations
+https://cuisine-crusader.herokuapp.com/associations/get
 ```
 
 Ingredients table as a JSON array
 ```
-https://cuisine-crusader.herokuapp.com/database/ingredients
+https://cuisine-crusader.herokuapp.com/ingredients/get
 ```
-
-
-
-## WebSockets
-
-| Request Type     | Data              | Result         | Description                                                   |
-|------------------|-------------------|----------------|---------------------------------------------------------------|
-| get-by-name      | "ingredient name" | ingredientJSON | Retrieves all rows for the given ingredient                   |
-| get-by-params    | ingredientJSON    | ["ingredient"] | Retrieves all ingredient names matching the search parameters |
-| get-associations | "ingredient name" | ["ingredient"] | Retrieves all association names for the given ingredient      |
-| set-association  | "name1, name2"    | "message"      | Associates 2 ingredients with each other                      |
-| add-ingredient   | ingredientJSON    | "message"      | Adds an ingredient to the database                            |
-
-
-## Client Query Strings
-
-Query strings go in the URL, sample below
-```
-https://cuisine-crusader.herokuapp.com/?test_mode=true
-```
-
-| Paramter  | Value             | Description                                |
-|-----------|-------------------|--------------------------------------------|
-| test_mode | true              | Forces the webpage to connect to localhost |
