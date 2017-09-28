@@ -6,15 +6,15 @@
     function(response:String, httpStatus:int)
 
     ** http status codes **
-    200 = request returned a value
-    400 = request was received but no value was found
+    200 = request returned a value (success)
+    400 = request was received but no value was found (fail)
 */
 
 var CCAPI = (function(){
-    // extract the host from the URL
-    var SERVER_HOST = "http://" + window.location.host; // same because its talking to the http server!
+    // extract the protocol + host from the URL
+    var SERVER_HOST = window.location.protocol + "//" + window.location.host; // same because its talking to the http server!
     // localhost will be missing a slash
-    if(SERVER_HOST.startsWith("http://localhost")){
+    if(SERVER_HOST.startsWith("http://localhost") || SERVER_HOST.startsWith("https://localhost")){
         SERVER_HOST += "/";
     }
 
