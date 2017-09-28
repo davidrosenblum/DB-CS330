@@ -30,10 +30,10 @@ app.route("/database").get((req, res) => {
     res.end("Database state = " + database.state);
 });
 
-
 // associations table JSON requested
-app.route("/associations/get").get((req, res) => {
+app.route("/associations/get*").get((req, res) => {
     database.getAssociationsTableJSON((err, rows) => {
+        if(err) console.log(err.message);
         res.writeHead(200);
         res.end(JSON.stringify((rows || []), null, 2));
     });
@@ -59,6 +59,7 @@ app.route("/associations/name*").get((req, res) => {
         }
         else{
             // error or no data
+            if(err) console.log(err.message);
             res.writeHead(400);
             res.end("No associations for \"" + name + "\".");
         }
@@ -68,6 +69,7 @@ app.route("/associations/name*").get((req, res) => {
 // ingredients table JSON requested
 app.route("/ingredients/get*").get((req, res) => {
     database.getIngredientsTableJSON((err, rows) => {
+        if(err) console.log(err.message);
         res.writeHead(200);
         res.end(JSON.stringify((rows || []), null, 2));
     });
@@ -83,6 +85,7 @@ app.route("/ingredients/name*").get((req, res) => {
             res.end(JSON.stringify(rows[0], null, 2));
         }
         else{
+            if(err) console.log(err.message);
             res.writeHead(400);
             res.end("No results for \"" + name + "\".");
         }
