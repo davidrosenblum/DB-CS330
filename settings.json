@@ -1,7 +1,7 @@
 {
     "host": "0.0.0.0",
     "port": 8080,
-    "mysql_host": "mysql://b34f31677816d5:5f005c94@us-cdbr-iron-east-05.cleardb.net/heroku_3121fd33e29e1ca?reconnect=true",
+    "mysql_host": "us-cdbr-iron-east-05.cleardb.net",
     "mysql_user": "b34f31677816d5",
     "mysql_password": "5f005c94",
     "mysql_port": 3306,
