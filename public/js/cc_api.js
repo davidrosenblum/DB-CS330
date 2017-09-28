@@ -12,11 +12,7 @@
 
 var CCAPI = (function(){
     // extract the protocol + host from the URL
-    var SERVER_HOST = window.location.protocol + "//" + window.location.host; // same because its talking to the http server!
-    // localhost will be missing a slash
-    if(SERVER_HOST.startsWith("http://localhost") || SERVER_HOST.startsWith("https://localhost")){
-        SERVER_HOST += "/";
-    }
+    var SERVER_HOST = window.location.protocol + "//" + window.location.host + "/"; // same because its talking to the http server!
 
     // sends AJAX requests
     var ajax = function(opts){
