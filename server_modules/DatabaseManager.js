@@ -24,6 +24,14 @@ let DatabaseManager = class DatabaseManager{
         this.conn.query(sql, callback);
     }
 
+    on(eventType, handler){
+        this.conn.on(eventType, handler);
+    }
+
+    destroy(){
+        this.conn.destroy();
+    }
+
     connect(callback){
         this.conn.connect(callback);
     }
@@ -85,7 +93,7 @@ let DatabaseManager = class DatabaseManager{
                 "techniques VARCHAR(255), " +
                 "PRIMARY KEY (id) " +
             ")",
-            err => {}
+            err => {if(err) console.log("ERR creating ingredients table\n" + err.message)}
         );
 
         // create the associations table
@@ -98,21 +106,20 @@ let DatabaseManager = class DatabaseManager{
                 "FOREIGN KEY (sourceID) REFERENCES ingredients(id) ON DELETE CASCADE, " +
                 "FOREIGN KEY (associateID) REFERENCES ingredients(id) ON DELETE CASCADE" +
             ")",
-            err => {}
+            err => {if(err) console.log("ERR creating associations table\n" + err.message)}
         );
 
         // test ingredients
         this.query(
             "INSERT INTO ingredients(name) " +
             "VALUES('Jawa Juice'), ('Szechuan McNugget Sauce'), ('Blue Milk'), ('Earl Gray Tea')",
-            err => {}
-        );
-
-        // test associations
-        this.query(
-            "INSERT INTO associations(sourceID, associateID) " +
-            "VALUES(1,2), (1,3)",
-            err => {}
+            err => {
+                this.query(
+                    "INSERT INTO associations(sourceID, associateID) " +
+                    "VALUES(1,2), (1,3)",
+                    err => {}
+                );
+            }
         );
     }
 

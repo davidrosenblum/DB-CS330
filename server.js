@@ -92,6 +92,20 @@ app.route("/ingredients/name*").get((req, res) => {
     });
 });
 
+app.route("/ingredients/search*").post((req, res) => {
+    // read the body
+    req.on("data", (body) => {
+        try{
+            let json = JSON.parse(body);
+
+
+        }
+        catch(err){
+
+        }
+    });
+});
+
 // extracts the name from the url
 let extractUrlValue = (url) => {
     // ex: 'http://host/directory/hello_there' -> 'hello there'
@@ -100,28 +114,6 @@ let extractUrlValue = (url) => {
 
     return extract.replace(new RegExp("_", "g"), " ");
 };
-
-/* (FINISH IMPLEMENTATION!)
-// adds an ingredient to the database
-let addIngredient = (socket, data) => {
-    // create the sql query
-    let query = "INSERT INTO ingredients";
-        params = "(",
-        values = "(";
-
-    for(let param in data){
-        query += param + ", ";
-        values += data[param] + ", ";
-    }
-
-    params = params.substring(0, params.length - 2) + ")";
-    values = values.substring(0, values.length - 2) + ")";
-
-    // respond to the socket
-    database.query(query, err => {
-        socket.send((err) ? err.message : "Ingredient added.");
-    });
-};*/
 
 // initializes the entire server
 // scary async function... loads settings -> connects to DB -> opens HTTP server
@@ -150,6 +142,11 @@ let init = () => {
                 // database connected
                 database.createTables();
                 console.log("Database connected.");
+
+                database.on("error", (err) => {
+                    console.log("DB ERR\t" + err);
+                    database.destroy();
+                });
             }
 
             // open the http server
