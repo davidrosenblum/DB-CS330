@@ -55,6 +55,15 @@ var CCAPI = (function(){
         });
     };
 
+    // requests the list of similar names (array of strings) for a target name
+    var requestNames = function(targetName, callback){
+        ajax({
+            url:        SERVER_HOST + "ingredients/find/" + formatIngredientName(targetName),
+            method:     "GET",
+            callback:   callback
+        });
+    };
+
     // requests the associations list (array of strings) for an ingredient
     var requestAssociations = function(ingredientName, callback){
         ajax({
@@ -104,6 +113,7 @@ var CCAPI = (function(){
         requestSearch:              requestSearch,
         requestIngredientsData:     requestIngredientsData,
         requestAssociationsData:    requestAssociationsData,
+        requestNames:               requestNames,
         setHost:                    setHost
     };
 })();

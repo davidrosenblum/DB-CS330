@@ -92,6 +92,29 @@ app.route("/ingredients/name*").get((req, res) => {
     });
 });
 
+app.route("/ingredients/find*").get((req, res) => {
+    let name = extractUrlValue(req.url);
+
+    database.queryNameMatches(name, (err, rows) => {
+        if(!err && rows.length > 0){
+            // successful query
+            // convert [{name: "..."}] to ["..."]
+            let resultData = [];
+            for(var associate of rows){
+                resultData.push(associate.name);
+            }
+
+            res.writeHead(200);
+            res.end(JSON.stringify(resultData, null, 2));
+        }
+        else{
+            if(err) console.log(err.message);
+            res.writeHead(200);
+            res.end("No results for \"" + name + "\".");
+        }
+    });
+});
+
 app.route("/ingredients/search*").post((req, res) => {
     // read the body
     req.on("data", (body) => {
