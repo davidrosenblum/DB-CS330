@@ -109,7 +109,7 @@ app.route("/ingredients/find*").get((req, res) => {
         }
         else{
             if(err) console.log(err.message);
-            res.writeHead(200);
+            res.writeHead(400);
             res.end("No results for \"" + name + "\".");
         }
     });

@@ -61,7 +61,7 @@ let DatabaseManager = class DatabaseManager{
         this.query(
             "SELECT name FROM ingredients " +
             "WHERE name LIKE '%" + name + "%' " +
-            "ORDER BY NAME ASC",
+            "ORDER BY name ASC LIMIT 10",
             callback
         );
     }
