@@ -57,6 +57,15 @@ let DatabaseManager = class DatabaseManager{
         );
     }
 
+    queryNameMatches(name, callback){
+        this.query(
+            "SELECT name FROM ingredients " +
+            "WHERE name LIKE '%" + name + "%' " +
+            "ORDER BY NAME ASC",
+            callback
+        );
+    }
+
     getIngredientsTableJSON(callback){
         this.query("SELECT * FROM ingredients", callback);
     }

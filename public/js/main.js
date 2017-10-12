@@ -19,10 +19,21 @@ var client = (function(){
         return querystrings;
     };
 
-    var getByName = function(){
-        var name = document.querySelector("#name-input").value.replace(new RegExp(" ", "g"), "_");
+    var formatIngredientName = function(ingredientName){
+        return ingredientName.replace(new RegExp(" ", "g"), "_");
+    };
+
+    var getInfo = function(name){
+        CCAPI.requestInfo(formatIngredientName(name), function(res, status){
+            console.log(res);
+            (status === 200) ? displayData(JSON.parse(res)) : displayMessage(res);
+        });
+    };
+
+    var findNames = function(){
+        var name = formatIngredientName(document.querySelector("#name-input").value);
         if(name){
-            CCAPI.requestInfo(name, function(res, status){
+            CCAPI.requestNames(name, function(res, status){
                 (status === 200) ? displayData(JSON.parse(res)) : displayMessage(res);
             });
         }
@@ -32,7 +43,7 @@ var client = (function(){
     };
 
     var getAssociations = function(){
-        var name = document.querySelector("#name-like-input").value.replace(new RegExp(" ", "g"), "_");
+        var name = formatIngredientName(document.querySelector("#name-like-input").value);
         if(name){
             CCAPI.requestAssociations(name, function(res, status){
                 (status === 200) ? displayData(JSON.parse(res)) : displayMessage(res);
@@ -76,14 +87,33 @@ var client = (function(){
         displayMessage(html);
     };
 
+    var createIngredientLink = function(ingredient){
+        var tag = document.createElement("a");
+
+        tag.onclick = function(){
+            getInfo(ingredient);
+        };
+
+        tag.setAttribute("href", "#");
+        tag.setAttribute("class", "ingredient-link");
+        tag.innerHTML = ingredient;
+
+        return tag;
+    };
+
     // array to html list (comma seperated text)
     var displayList = function(data){
-        var html = "";
-        for(var i = 0; i < data.length; i++){
-            html += "<a href='#'>" + data[i] + "</a>, ";
-        }
+        displayMessage("");
 
-        displayMessage(html.substring(0, html.length - 2));
+        var container = document.querySelector("#results-container");
+
+        // generate <a> tags for each ingredient
+        for(var i = 0, tag; i < data.length; i++){
+            tag = createIngredientLink(data[i]);
+            container.appendChild(tag);
+            //container.innerHTML += ", ";
+        }
+        //container.innerHTML = container.innerHTML.substring(0, container.innerHTML.length - 2);
     };
 
     // display message in the DOM
@@ -93,38 +123,10 @@ var client = (function(){
         container.innerHTML = message;
     };
 
-    var showSearch = function(){
-        hideSearchContainers();
-
-        document.querySelector("#link-search").parentNode.classList.add("active");
-    };
-
-    var showSearchSimilar = function(){
-        hideSearchContainers();
-
-        document.querySelector("#link-search-similar").parentNode.classList.add("active");
-    };
-
-    var showIngredientInfo = function(){
-        hideSearchContainers();
-
-        document.querySelector("#link-ingredient-info").parentNode.classList.add("active");
-    };
-
-    var hideSearchContainers = function(){
-        document.querySelector("#link-search").parentNode.classList.remove("active");
-        document.querySelector("#link-search-similar").parentNode.classList.remove("active");
-        document.querySelector("#link-ingredient-info").parentNode.classList.remove("active");
-    };
-
     var init = function(){
-        // attach nav btn listesners
-        document.querySelector("#link-search").addEventListener("click", showSearch);
-        document.querySelector("#link-search-similar").addEventListener("click", showSearchSimilar);
-        document.querySelector("#link-ingredient-info").addEventListener("click", showIngredientInfo);
         // attach button click listeners
         document.querySelector("#search-like").addEventListener("click", getAssociations);
-        document.querySelector("#search-name").addEventListener("click", getByName);
+        document.querySelector("#search-name").addEventListener("click", findNames);
     };
     window.addEventListener("load", init);
 })();
