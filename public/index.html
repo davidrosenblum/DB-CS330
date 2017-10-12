@@ -29,81 +29,86 @@
         <main class="container">
             <div id="search-row" class="row">
                 <div class="col-md-4">
-                    <div class="center-div">Search For Ingredients</div>
+                    <div class="centered">
+                        <h3>Search By Paramaters</h3>
+                    </div>
                     <div>Gets a list of ingredients that matches the search parameters.</div>
-                    <table class="table table-inverse" align="center">
-                        <tbody>
-                            <tr>
-                                <td>Flavor</td>
-                                <td>
-                                    <select id="flavor-input" class="input-select">
-                                        <option>(Ignore)</option>
-                                        <option>Sweet</option>
-                                        <option>Sour</option>
-                                        <option>Hot</option>
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Weight</td>
-                                <td>
-                                    <select id="weight-input" class="input-select">
-                                        <option>(Ignore)</option>
-                                        <option>Light</option>
-                                        <option>Medium</option>
-                                        <option>Heavy</option>
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Season</td>
-                                <td>
-                                    <select id="season-input" class="input-select">
-                                        <option>(Ignore)</option>
-                                        <option>Winter</option>
-                                        <option>Spring</option>
-                                        <option>Summer</option>
-                                        <option>Fall</option>
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Protein (g)</td>
-                                <td>
-                                    <input class="input-number" type="number" min="0" max="100" value="">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Calories:</td>
-                                <td>
-                                    <input class="input-number" type="number" min="0" max="999" value="">
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="center-div">
-                        <button id="search-fields">Search</button>
+                    <div>
+                        <table class="table table-inverse" align="center">
+                            <tbody>
+                                <tr>
+                                    <td>Flavor</td>
+                                    <td>
+                                        <select id="flavor-input" class="input-select">
+                                            <option>(Ignore)</option>
+                                            <option>Sweet</option>
+                                            <option>Sour</option>
+                                            <option>Hot</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Weight</td>
+                                    <td>
+                                        <select id="weight-input" class="input-select">
+                                            <option>(Ignore)</option>
+                                            <option>Light</option>
+                                            <option>Medium</option>
+                                            <option>Heavy</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Season</td>
+                                    <td>
+                                        <select id="season-input" class="input-select">
+                                            <option>(Ignore)</option>
+                                            <option>Winter</option>
+                                            <option>Spring</option>
+                                            <option>Summer</option>
+                                            <option>Fall</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Protein (g)</td>
+                                    <td>
+                                        <input class="input-number" type="number" min="0" max="100" value="">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Calories:</td>
+                                    <td>
+                                        <input class="input-number" type="number" min="0" max="999" value="">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="centered">
+                        <button id="search-params-btn">Search</button>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="center-div">Search Ingredints Like</div>
-                    <div>Gets a list of ingredients that are similar to the one given.</div>
-                    <p>
+                    <div class="centered">
+                        <h3>Search Ingredints Like</h3>
+                    </div>
+                    <div>Gets a list of ingredients that are associated to the one given.</div>
+                    <div class="centered">
                         Name:
-                        <input id="name-like-input" class="input-text" type="text" placeholder="Type name here." maxlength="25">
-                    </p>
-                    <div class="center-div">
-                        <button id="search-like">Search</button>
+                        <input id="associations-name-input" class="input-text" type="text" placeholder="Type name here." maxlength="25">
+                        <button id="search-associations-btn">Search</button>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="center-div">Search Ingredient Information</div>
-                    <p>
+                    <div class="centered">
+                        <h3>Search For Ingredients</h3>
+                    </div>
+                    <div>Gets a list of ingedients when you don't know a specific name.</div>
+                    <div class="centered">
                         Name:
-                        <input id="name-input" class="input-text" type="text" placeholder="Type name here." maxlength="25">
-                    </p>
-                    <div class="center-div">
-                        <button id="search-name">Search</button>
+                        <input id="find-name-input" class="input-text" type="text" placeholder="Type name here." maxlength="25">
+                        <button id="find-name-btn">Search</button>
                     </div>
                 </div>
             </div>

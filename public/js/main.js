@@ -31,7 +31,7 @@ var client = (function(){
     };
 
     var findNames = function(){
-        var name = formatIngredientName(document.querySelector("#name-input").value);
+        var name = formatIngredientName(document.querySelector("#find-name-input").value);
         if(name){
             CCAPI.requestNames(name, function(res, status){
                 (status === 200) ? displayData(JSON.parse(res)) : displayMessage(res);
@@ -43,7 +43,7 @@ var client = (function(){
     };
 
     var getAssociations = function(){
-        var name = formatIngredientName(document.querySelector("#name-like-input").value);
+        var name = formatIngredientName(document.querySelector("#associations-name-input").value);
         if(name){
             CCAPI.requestAssociations(name, function(res, status){
                 (status === 200) ? displayData(JSON.parse(res)) : displayMessage(res);
@@ -94,7 +94,7 @@ var client = (function(){
             getInfo(ingredient);
         };
 
-        tag.setAttribute("href", "#");
+        tag.setAttribute("href", "#results-container");
         tag.setAttribute("class", "ingredient-link");
         tag.innerHTML = ingredient;
 
@@ -125,8 +125,8 @@ var client = (function(){
 
     var init = function(){
         // attach button click listeners
-        document.querySelector("#search-like").addEventListener("click", getAssociations);
-        document.querySelector("#search-name").addEventListener("click", findNames);
+        document.querySelector("#search-associations-btn").addEventListener("click", getAssociations);
+        document.querySelector("#find-name-btn").addEventListener("click", findNames);
     };
     window.addEventListener("load", init);
 })();
