@@ -32,6 +32,10 @@ let DatabaseManager = class DatabaseManager{
         this.conn.destroy();
     }
 
+    end(callback){
+        this.conn.end(callback);
+    }
+
     connect(callback){
         this.conn.connect(callback);
     }

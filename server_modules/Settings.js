@@ -5,7 +5,6 @@ let fs = require("fs");
 
 // default settings object
 let DEFAULT_SETTINGS = {
-    host:           "0.0.0.0",
     port:           8080,
     mysql_host:     "127.0.0.1",
     mysql_user:     "root",
