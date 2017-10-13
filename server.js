@@ -145,6 +145,13 @@ let reconnectDB = (callback) => {
     }
 
     database = new DatabaseManager(settings);
+
+    database.on("error", (err) => {
+        console.log("DB ERR\t" + err);
+        // close and reconnect
+        database.end(() => reconnectDB());
+    });
+
     database.connect(err => {
         (err) ? console.log("Error reconnecting.\n" + err.message) : console.log("Database reconnected.");
     });
@@ -177,6 +184,15 @@ let init = () => {
                 // database connected
                 database.createTables();
                 console.log("Database connected.");
+
+                // keep alive - REPLACED WITH RECONNECT FUNCTION
+                /*let timeoutId = setTimeout(() => {
+                    if(database && database.state === "authenticated"){
+                        // bs query
+                        database.query("SELECT name FROM ingredients WHERE name = 'test'");
+                    }
+                    else clearTimeout(timeoutId);
+                }, 60000);*/
 
                 database.on("error", (err) => {
                     console.log("DB ERR\t" + err);
