@@ -185,15 +185,6 @@ let init = () => {
                 database.createTables();
                 console.log("Database connected.");
 
-                // keep alive - REPLACED WITH RECONNECT FUNCTION
-                /*let timeoutId = setTimeout(() => {
-                    if(database && database.state === "authenticated"){
-                        // bs query
-                        database.query("SELECT name FROM ingredients WHERE name = 'test'");
-                    }
-                    else clearTimeout(timeoutId);
-                }, 60000);*/
-
                 database.on("error", (err) => {
                     console.log("DB ERR\t" + err);
                     // close and reconnect
