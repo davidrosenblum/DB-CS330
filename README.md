@@ -39,7 +39,6 @@ __Settings.json__ file - created when server is first launched witih default val
 
 ```javascript
 {
-    "host": 			"0.0.0.0",
     "port": 			8080,
     "mysql_host": 		"127.0.0.1",
     "mysql_user": 		"root",
@@ -52,32 +51,12 @@ __Settings.json__ file - created when server is first launched witih default val
 
 ## REST API
 
-Current database connection state
-```
-https://cuisine-crusader.herokuapp.com/database
-```
-
-Ingredient data from name
-```
-https://cuisine-crusader.herokuapp.com/ingredients/name/INGREDIENT_NAME
-```
-
-Assocations from an ingredient name
-```
-https://cuisine-crusader.herokuapp.com/associations/name/INGREDIENT_NAME
-```
-Search for ingredients by parameters
-```
-https://cuisine-crusader.herokuapp.com/ingredients/search
-(Search params JSON in request BODY!)
-```
-
-Association table as a JSON array
-```
-https://cuisine-crusader.herokuapp.com/associations/get
-```
-
-Ingredients table as a JSON array
-```
-https://cuisine-crusader.herokuapp.com/ingredients/get
-```
+| Endpoint                                                                 | Description                                                                     | Returns       |
+|--------------------------------------------------------------------------|---------------------------------------------------------------------------------|---------------|
+| https://cuisine-crusader.herokuapp.com/database                          | Current database connection state                                               | String        |
+| https://cuisine-crusader.herokuapp.com/ingredients/name/INGREDIENT_NAME  | Ingredient data/info from name                                                  | Object        |
+| https://cuisine-crusader.herokuapp.com/ingredients/find/TARGET_STRING    | Ingredient names from a target name  (ex: "j" gets names including that string) | Array<String> |
+| https://cuisine-crusader.herokuapp.com/associations/name/INGREDIENT_NAME | Assocations from an ingredient name                                             | Array<String> |
+| https://cuisine-crusader.herokuapp.com/ingredients/search                | Search for ingredients by parameters (search params JSON in request BODY!)      | Array<String> |
+| https://cuisine-crusader.herokuapp.com/ingredients/get                   | Ingredients table as a JSON array                                               | Array<Object> |
+| https://cuisine-crusader.herokuapp.com/associations/get                  | Association table as a JSON array                                               | Array<Object> |

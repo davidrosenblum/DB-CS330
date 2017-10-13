@@ -138,6 +138,18 @@ let extractUrlValue = (url) => {
     return extract.replace(new RegExp("_", "g"), " ");
 };
 
+// reconnects the DB when it crashes
+let reconnectDB = (callback) => {
+    if(database.state !== "disconnected"){
+        return;
+    }
+
+    database = new DatabaseManager(settings);
+    database.connect(err => {
+        (err) ? console.log("Error reconnecting.\n" + err.message) : console.log("Database reconnected.");
+    });
+};
+
 // initializes the entire server
 // scary async function... loads settings -> connects to DB -> opens HTTP server
 let init = () => {
@@ -168,12 +180,13 @@ let init = () => {
 
                 database.on("error", (err) => {
                     console.log("DB ERR\t" + err);
-                    database.destroy();
+                    // close and reconnect
+                    database.end(() => reconnectDB());
                 });
             }
 
             // open the http server
-            app.listen(settings.port, settings.host, err => {
+            app.listen(settings.port, err => {
                 if(err){
                     // http server failed to open
                     console.log("HTTP server error:\n" + err.message);
@@ -181,7 +194,7 @@ let init = () => {
                 }
                 else{
                     // http server opened
-                    console.log("HTTP server listening on " + settings.host + ":" + settings.port + ".");
+                    console.log("HTTP server listening on port " + settings.port + ".");
                 }
             });
         });
