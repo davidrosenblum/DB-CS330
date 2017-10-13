@@ -145,6 +145,13 @@ let reconnectDB = (callback) => {
     }
 
     database = new DatabaseManager(settings);
+
+    database.on("error", (err) => {
+        console.log("DB ERR\t" + err);
+        // close and reconnect
+        database.end(() => reconnectDB());
+    });
+
     database.connect(err => {
         (err) ? console.log("Error reconnecting.\n" + err.message) : console.log("Database reconnected.");
     });
