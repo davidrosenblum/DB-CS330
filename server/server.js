@@ -6,12 +6,13 @@ let fs = require("fs"),                             // file system
     mysql = require("mysql");                       // mysql database driver
 
 // import local modules
-let Settings = require("./server_modules/Settings.js"),
-    DatabaseManager = require("./server_modules/DatabaseManager.js");
+let Settings = require("./js/Settings.js"),
+    QueryManager = require("./js/QueryManager.js");
 
 // fields
 let settings =      null,   // settings object
-    database =      null;   // database connection object
+    database =      null,   // database connection object
+    queryManager =  null;   // object that queries the database
 
 // create the http server
 let app = express();
@@ -32,7 +33,7 @@ app.route("/database").get((req, res) => {
 
 // associations table JSON requested
 app.route("/associations/get*").get((req, res) => {
-    database.getAssociationsTableJSON((err, rows) => {
+    queryManager.getAssociationsTableJSON((err, rows) => {
         if(err) console.log(err.message);
         res.writeHead(200);
         res.end(JSON.stringify((rows || []), null, 2));
@@ -44,7 +45,7 @@ app.route("/associations/name*").get((req, res) => {
     // extract the name from the url
     let name = extractUrlValue(req.url);
 
-    database.queryAssociates(name, (err, rows) => {
+    queryManager.queryAssociates(name, (err, rows) => {
         if(!err && rows.length > 0){
             // successful query
             // convert [{name: "..."}] to ["..."]
@@ -68,7 +69,7 @@ app.route("/associations/name*").get((req, res) => {
 
 // ingredients table JSON requested
 app.route("/ingredients/get*").get((req, res) => {
-    database.getIngredientsTableJSON((err, rows) => {
+    queryManager.getIngredientsTableJSON((err, rows) => {
         if(err) console.log(err.message);
         res.writeHead(200);
         res.end(JSON.stringify((rows || []), null, 2));
@@ -79,7 +80,7 @@ app.route("/ingredients/get*").get((req, res) => {
 app.route("/ingredients/name*").get((req, res) => {
     let name = extractUrlValue(req.url);
 
-    database.queryName(name, (err, rows) => {
+    queryManager.queryName(name, (err, rows) => {
         if(!err && rows.length > 0){
             res.writeHead(200);
             res.end(JSON.stringify(rows[0], null, 2));
@@ -95,7 +96,7 @@ app.route("/ingredients/name*").get((req, res) => {
 app.route("/ingredients/find*").get((req, res) => {
     let name = extractUrlValue(req.url);
 
-    database.queryNameMatches(name, (err, rows) => {
+    queryManager.queryNameMatches(name, (err, rows) => {
         if(!err && rows.length > 0){
             // successful query
             // convert [{name: "..."}] to ["..."]
@@ -139,22 +140,32 @@ let extractUrlValue = (url) => {
 };
 
 // reconnects the DB when it crashes
-let reconnectDB = (callback) => {
-    if(database.state !== "disconnected"){
-        return;
-    }
+let connectDB = (callback) => {
+    // setup the mysql connection
+    database = mysql.createConnection({
+        host:       settings.mysql_host,
+        port:       settings.mysql_port,
+        user:       settings.mysql_user,
+        password:   settings.mysql_password,
+        database:   settings.mysql_database
+    });
 
-    database = new DatabaseManager(settings);
-
+    // handle database error
     database.on("error", (err) => {
+        // log the error msg
         console.log("DB ERR\t" + err);
-        // close and reconnect
-        database.end(() => reconnectDB());
+
+        // attempt reconnect
+        connectDB(err => {
+            if(!err) console.log("Database reconnected.");
+        });
     });
 
-    database.connect(err => {
-        (err) ? console.log("Error reconnecting.\n" + err.message) : console.log("Database reconnected.");
-    });
+    // create the query manager for the databse connection instance
+    queryManager = new QueryManager(database);
+
+    // connect
+    database.connect(callback);
 };
 
 // initializes the entire server
@@ -174,22 +185,15 @@ let init = () => {
         console.log("Connecting to database...");
 
         // connect to the database
-        database = new DatabaseManager(settings);
-        database.connect(err => {
+        connectDB(err => {
             if(err){
                 // database failed to connect
                 console.log(err.message);
             }
             else{
                 // database connected
-                database.createTables();
+                queryManager.createTables();
                 console.log("Database connected.");
-
-                database.on("error", (err) => {
-                    console.log("DB ERR\t" + err);
-                    // close and reconnect
-                    database.end(() => reconnectDB());
-                });
             }
 
             // open the http server

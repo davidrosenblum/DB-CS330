@@ -1,6 +1,6 @@
 @ECHO off
 @TITLE Node Server
 
-NODE "server.js"
+NODE "server/server.js"
 
 PAUSE
