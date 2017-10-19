@@ -3,41 +3,13 @@
 let mysql = require("mysql"),
     Settings = require("./Settings.js");
 
-let DatabaseManager = class DatabaseManager{
-    constructor(settings){
-        // enforce settings argument is an instance of settings
-        if(!settings || !(settings instanceof Settings)){
-            throw new Error("settings argument must be of type Settings.");
-        }
-
-        // setup the mysql connection
-        this.conn = mysql.createConnection({
-            host:       settings.mysql_host,
-            port:       settings.mysql_port,
-            user:       settings.mysql_user,
-            password:   settings.mysql_password,
-            database:   settings.mysql_database
-        });
+let QueryManager = class QueryManager{
+    constructor(mysqlConn){
+        this.conn = mysqlConn;
     }
 
     query(sql, callback){
         this.conn.query(sql, callback);
-    }
-
-    on(eventType, handler){
-        this.conn.on(eventType, handler);
-    }
-
-    destroy(){
-        this.conn.destroy();
-    }
-
-    end(callback){
-        this.conn.end(callback);
-    }
-
-    connect(callback){
-        this.conn.connect(callback);
     }
 
     queryName(name, callback){
@@ -141,4 +113,4 @@ let DatabaseManager = class DatabaseManager{
     }
 };
 
-module.exports = DatabaseManager;
+module.exports = QueryManager;

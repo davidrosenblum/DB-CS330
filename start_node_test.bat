@@ -1,6 +1,6 @@
 @ECHO off
 @TITLE Node Server
 
-NODEMON "server.js"
+NODEMON "server/server.js"
 
 PAUSE
