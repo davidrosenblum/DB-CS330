@@ -94,7 +94,8 @@ var client = (function(){
             getInfo(ingredient);
         };
 
-        tag.setAttribute("href", "#results-container");
+        //tag.setAttribute("href", "#results-container");
+        tag.setAttribute("href", "#");
         tag.setAttribute("class", "ingredient-link");
         tag.innerHTML = ingredient;
 
