@@ -1,5 +1,5 @@
 body{
-    background: linear-gradient(180deg, white, gray) fixed 100% 100%;
+    /*background: linear-gradient(180deg, white, gray) fixed 100% 100%;*/
 }
 
 #search-row button{
@@ -26,6 +26,10 @@ body{
     text-align: center;
     box-shadow: 2px 2px black;
     margin-bottom: 10px;
+}
+
+header{
+    margin-top: 50px;
 }
 
 .ingredient-link{

@@ -28,7 +28,8 @@ let QueryManager = class QueryManager{
             "FROM associations " +
             "JOIN ingredients " +
             "ON associations.sourceID = (SELECT id FROM ingredients WHERE name = '" + data + "' LIMIT 1) " +
-            "AND ingredients.id = associations.associateID ",
+            "AND ingredients.id = associations.associateID " +
+            "ORDER BY name ASC",
             callback
         );
     }
@@ -78,31 +79,33 @@ let QueryManager = class QueryManager{
                 "techniques VARCHAR(255), " +
                 "PRIMARY KEY (id) " +
             ")",
-            err => {if(err) console.log("ERR creating ingredients table\n" + err.message)}
-        );
-
-        // create the associations table
-        this.query(
-            "CREATE TABLE IF NOT EXISTS associations(" +
-                /*"id INT AUTO_INCREMENT UNIQUE NOT NULL, " +*/
-                "sourceID INT NOT NULL, " +
-                "associateID INT NOT NULL, " +
-                "PRIMARY KEY (sourceID, associateID), " +
-                "FOREIGN KEY (sourceID) REFERENCES ingredients(id) ON DELETE CASCADE, " +
-                "FOREIGN KEY (associateID) REFERENCES ingredients(id) ON DELETE CASCADE" +
-            ")",
-            err => {if(err) console.log("ERR creating associations table\n" + err.message)}
-        );
-
-        // test ingredients
-        this.query(
-            "INSERT INTO ingredients(name) " +
-            "VALUES('Jawa Juice'), ('Szechuan McNugget Sauce'), ('Blue Milk'), ('Earl Gray Tea')",
             err => {
+                if(err) return console.log(err.message);
+                // create the associations table
                 this.query(
-                    "INSERT INTO associations(sourceID, associateID) " +
-                    "VALUES(1,2), (1,3)",
-                    err => {}
+                    "CREATE TABLE IF NOT EXISTS associations(" +
+                        /*"id INT AUTO_INCREMENT UNIQUE NOT NULL, " +*/
+                        "sourceID INT NOT NULL, " +
+                        "associateID INT NOT NULL, " +
+                        "PRIMARY KEY (sourceID, associateID), " +
+                        "FOREIGN KEY (sourceID) REFERENCES ingredients(id) ON DELETE CASCADE, " +
+                        "FOREIGN KEY (associateID) REFERENCES ingredients(id) ON DELETE CASCADE" +
+                    ")",
+                    err => {
+                        if(err) return console.log(err.message);
+                        // test ingredients
+                        this.query(
+                            "INSERT INTO ingredients(name) " +
+                            "VALUES('Jawa Juice'), ('Szechuan McNugget Sauce'), ('Blue Milk'), ('Earl Gray Tea')",
+                            err => {
+                                this.query(
+                                    "INSERT INTO associations(sourceID, associateID) " +
+                                    "VALUES(1,2), (1,3)",
+                                    err => {}
+                                );
+                            }
+                        );
+                    }
                 );
             }
         );
