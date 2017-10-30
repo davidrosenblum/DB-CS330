@@ -87,7 +87,6 @@ typings/
 # dotenv environment variables file
 .env
 
-
 # Node Modules
 node_modules/
 
