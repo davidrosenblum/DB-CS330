@@ -92,3 +92,6 @@ node_modules/
 
 # Settings
 settings.json
+
+#datagrip
+.idea
