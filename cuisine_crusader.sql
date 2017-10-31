@@ -1,7 +1,7 @@
 CREATE DATABASE IF NOT EXISTS cuisine_crusader;
 
 CREATE TABLE IF NOT EXISTS techniques (
-  id    INT(4)      NOT NULL  AUTO_INCREMENT,
+  id    INT(4)      NOT NULL  AUTO_INCREMENT  UNIQUE,
   name  VARCHAR(30) NOT NULL,
   PRIMARY KEY (id)
 );
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS techniques (
 ALTER TABLE techniques AUTO_INCREMENT=11;
 
 CREATE TABLE IF NOT EXISTS taste (
-  id    INT(4)      NOT NULL  AUTO_INCREMENT,
+  id    INT(4)      NOT NULL  AUTO_INCREMENT  UNIQUE,
   name  VARCHAR(30) NOT NULL,
   PRIMARY KEY (id)
 );
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS taste (
 ALTER TABLE taste AUTO_INCREMENT=66;
 
 CREATE TABLE IF NOT EXISTS cuisine (
-    id        INT(8)      NOT NULL  AUTO_INCREMENT,
+    id        INT(8)      NOT NULL  AUTO_INCREMENT  UNIQUE,
     name      VARCHAR(30) NOT NULL,
     season    ENUM('Autumn', 'Autumn-Spring',
                    'Autumn-Winter', 'Spring',
@@ -148,5 +148,6 @@ INSERT INTO taste (name) VALUES
   ('Hot'),
   ('Very Hot'),
   ('Spicy'),
-  ('Bittersweet')
+  ('Bittersweet'),
+  ('Savory')
 ;
