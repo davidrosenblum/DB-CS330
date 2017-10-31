@@ -1,16 +1,16 @@
 CREATE DATABASE IF NOT EXISTS cuisine_crusader;
 
 CREATE TABLE IF NOT EXISTS techniques (
-  id    INT(4)      NOT NULL  AUTO_INCREMENT  UNIQUE,
-  name  VARCHAR(30) NOT NULL,
+  id    SMALLINT(4)   NOT NULL  AUTO_INCREMENT  UNIQUE,
+  name  VARCHAR(30)   NOT NULL,
   PRIMARY KEY (id)
 );
 
 ALTER TABLE techniques AUTO_INCREMENT=11;
 
 CREATE TABLE IF NOT EXISTS taste (
-  id    INT(4)      NOT NULL  AUTO_INCREMENT  UNIQUE,
-  name  VARCHAR(30) NOT NULL,
+  id    SMALLINT(4)   NOT NULL  AUTO_INCREMENT  UNIQUE,
+  name  VARCHAR(30)   NOT NULL,
   PRIMARY KEY (id)
 );
 
@@ -35,8 +35,8 @@ CREATE TABLE IF NOT EXISTS cuisine (
 ALTER TABLE cuisine AUTO_INCREMENT=3003;
 
 CREATE TABLE IF NOT EXISTS technique_associations (
-    cuisine_id    INT(8)  NOT NULL,
-    technique_id  INT(4)  NOT NULL,
+    cuisine_id    INT(8)      NOT NULL,
+    technique_id  SMALLINT(4) NOT NULL,
     INDEX (cuisine_id),
     INDEX (technique_id),
     FOREIGN KEY (cuisine_id)
@@ -51,8 +51,8 @@ CREATE TABLE IF NOT EXISTS technique_associations (
 );
 
 CREATE TABLE IF NOT EXISTS taste_associations (
-    cuisine_id    INT(8)  NOT NULL,
-    taste_id      INT(4)  NOT NULL,
+    cuisine_id    INT(8)      NOT NULL,
+    taste_id      SMALLINT(4) NOT NULL,
     INDEX (cuisine_id),
     INDEX (taste_id),
     FOREIGN KEY (cuisine_id)
@@ -67,8 +67,8 @@ CREATE TABLE IF NOT EXISTS taste_associations (
 );
 
 CREATE TABLE IF NOT EXISTS cuisine_associations (
-    cuisine_id INT(8) NOT NULL,
-    association_id INT(8) NOT NULL,
+    cuisine_id      INT(8) NOT NULL,
+    association_id  INT(8) NOT NULL,
     compatibility ENUM('Avoid', 'Compatible', 'Recommended', 'Highly Recommended', 'Highest Recommendation'),
     INDEX (cuisine_id),
     INDEX (association_id),
