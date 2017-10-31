@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS taste (
   PRIMARY KEY (id)
 );
 
-ALTER TABLE taste AUTO_INCREMENT=22;
+ALTER TABLE taste AUTO_INCREMENT=66;
 
 CREATE TABLE IF NOT EXISTS cuisine (
     id        INT(8)      NOT NULL  AUTO_INCREMENT,
@@ -67,28 +67,86 @@ CREATE TABLE IF NOT EXISTS taste_associations (
 );
 
 CREATE TABLE IF NOT EXISTS cuisine_associations (
-    association_x INT(8) NOT NULL,
-    association_a INT(8) NOT NULL,
+    cuisine_id INT(8) NOT NULL,
+    association_id INT(8) NOT NULL,
     compatibility ENUM('Avoid', 'Compatible', 'Recommended', 'Highly Recommended', 'Highest Recommendation'),
-    INDEX (association_x),
-    INDEX (association_a),
-    FOREIGN KEY (association_x)
+    INDEX (cuisine_id),
+    INDEX (association_id),
+    FOREIGN KEY (cuisine_id)
       REFERENCES cuisine(id)
       ON UPDATE CASCADE
       ON DELETE RESTRICT,
-    FOREIGN KEY (association_a)
+    FOREIGN KEY (association_id)
       REFERENCES cuisine(id)
       ON UPDATE CASCADE
       ON DELETE RESTRICT,
-    PRIMARY KEY (association_x, association_a)
+    PRIMARY KEY (cuisine_id, association_id)
 );
 
 INSERT INTO techniques (name) VALUES
-  ('sauté'),
-  ()
+  ('Sauté'),
+  ('Bake'),
+  ('Grill'),
+  ('Poach'),
+  ('Raw'),
+  ('Stew'),
+  ('Braise'),
+  ('Boil'),
+  ('Broil'),
+  ('Deep-Fry'),
+  ('Roast'),
+  ('Steam'),
+  ('Blanche'),
+  ('Cream'),
+  ('Fry'),
+  ('Soups'),
+  ('Wilt'),
+  ('Pan Roast'),
+  ('Simmer'),
+  ('Stir-Fry'),
+  ('Glaze'),
+  ('Caramelize'),
+  ('Ceviche'),
+  ('Sear'),
+  ('Cooked Applications'),
+  ('Puree'),
+  ('Refry'),
+  ('Barbecue'),
+  ('Dry Roast'),
+  ('Carpaccio'),
+  ('Chips'),
+  ('Stuff'),
+  ('Blacken'),
+  ('Ferment'),
+  ('Gratin'),
+  ('Gratiné'),
+  ('Parboil'),
+  ('Candy'),
+  ('Cakes'),
+  ('Steep'),
+  ('Tempura'),
+  ('Pickle'),
+  ('Scramble'),
+  ('Terrine'),
+  ('Juice'),
+  ('Marinades'),
+  ('Sauces'),
+  ('Emulsify')
 ;
 
 INSERT INTO taste (name) VALUES
-  ('sweet'),
-  ()
+  ('Sweet'),
+  ('Salty'),
+  ('Bitter'),
+  ('Astringent'),
+  ('Anise'),
+  ('Various'),
+  ('Sour'),
+  ('Pungent'),
+  ('Rich'),
+  ('Piquant'),
+  ('Hot'),
+  ('Very Hot'),
+  ('Spicy'),
+  ('Bittersweet')
 ;
