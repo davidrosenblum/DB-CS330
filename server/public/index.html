@@ -9,28 +9,6 @@
 </head>
 <body>
     <div id="wrapper">
-        <nav class="navbar navbar-inverse navbar-fixed-top">
-            <div class="container">
-                <div class="navbar-header">
-                    <a href="/" class="navbar-brand">
-                        Cuisine Crusader
-                    </a>
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                </div>
-                <div id="navbar" class="navbar-collapse collapse">
-                    <ul class="nav navbar-nav">
-                        <li class="active">
-                            <a href="#">Search</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-
         <header class="jumbotron">
             <div class="container">
                 <h1>Cuisine Crusader</h1>
@@ -39,88 +17,38 @@
         </header>
         <main class="container">
             <div id="search-row" class="row">
-                <div class="col-md-6"> <!-- make col md 4 later! -->
-                    <h2>Name Search</h2>
-                    <p>Gets a list of ingedients when you don't know a specific name.</p>
-                    <p>
-                        Name:
-                        <input id="find-name-input" class="input-text" type="text" placeholder="Type name here." maxlength="25">
-                        <button class="btn" id="find-name-btn">Search</button>
-                    </p>
-                </div>
-                <div class="col-md-6"> <!-- make col md 4 later! -->
-                    <h2>Association Search</h2>
-                    <p>Gets a list of ingredients that are associated to the one given.</p>
-                    <p>
-                        Name:
-                        <input id="associations-name-input" class="input-text" type="text" placeholder="Type name here." maxlength="25">
-                        <button class="btn" id="search-associations-btn">Search</button>
-                    </p>
-                </div>
-                <!--<div class="col-md-4">
-                    <h2>Parameter Search</h2>
-                    <p>Gets a list of ingredients that matches the search parameters.</p>
-                    <div>
-                        <table class="table table-inverse">
-                            <tbody>
-                                <tr>
-                                    <td>Flavor</td>
-                                    <td>
-                                        <select id="flavor-input" class="input-select">
-                                            <option>(Ignore)</option>
-                                            <option>Sweet</option>
-                                            <option>Sour</option>
-                                            <option>Hot</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Weight</td>
-                                    <td>
-                                        <select id="weight-input" class="input-select">
-                                            <option>(Ignore)</option>
-                                            <option>Light</option>
-                                            <option>Medium</option>
-                                            <option>Heavy</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Season</td>
-                                    <td>
-                                        <select id="season-input" class="input-select">
-                                            <option>(Ignore)</option>
-                                            <option>Winter</option>
-                                            <option>Spring</option>
-                                            <option>Summer</option>
-                                            <option>Fall</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Protein (g)</td>
-                                    <td>
-                                        <input class="input-number" type="number" min="0" max="100" value="">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Calories:</td>
-                                    <td>
-                                        <input class="input-number" type="number" min="0" max="999" value="">
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div class="col-md-4">
+                    <h2>My Items</h2>
+                    <div id="items-container">
+                        (Empty)
                     </div>
-                    <button class="btn" id="search-params-btn">Search</button>
-                </div>-->
+                </div>
+                <div class="col-md-6"> <!-- make col md 4 later! -->
+                    <h2>Search</h2>
+                    <div class="form-group">
+                        <input id="search-input" type="text" class="form-control input-lg" placeholder="Search here...">
+                    </div>
+                    <div class="form-group">
+                        <select id="search-type" class="form-control input-lg">
+                            <option>Cuisines</option>
+                            <option>Tastes</option>
+                            <option>Techniques</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button id="search-btn" class="btn-slide">Search</button>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                </div>
             </div>
             <div id="results-row" class="row">
-                <div id="results-container" class="container">
-                </div>
+                <div class="col-md-4"></div>
+                <div id="results-container" class="col-md-4"></div>
+                <div class="col-md-4"></div>
             </div>
-            <hr>
-            <footer>
+            <footer class="container">
+                <hr>
                 <p>Robert Juall | David Rosenblum</p>
             </footer>
         </main>

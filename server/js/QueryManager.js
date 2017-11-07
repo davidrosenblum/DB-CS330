@@ -3,6 +3,8 @@
 let mysql = require("mysql"),
     Settings = require("./Settings.js");
 
+const MAX_RESULT_ROWS = 20;
+
 let QueryManager = class QueryManager{
     constructor(mysqlConn){
         this.conn = mysqlConn;
@@ -12,102 +14,176 @@ let QueryManager = class QueryManager{
         this.conn.query(sql, callback);
     }
 
-    queryName(name, callback){
-        // sql query
+    // cuisine name search
+    queryCuisines(search, callback){
         this.query(
-            "SELECT * FROM ingredients " +
-            "WHERE name = '" + name + "' LIMIT 1",
+            "SELECT name FROM cuisines " +
+            "WHERE name LIKE '%" + search + "%' " +
+            "ORDER BY name ASC LIMIT " + MAX_RESULT_ROWS,
             callback
         );
     }
 
-    queryAssociates(data, callback){
-        // sql query
+    // all data for 1 cuisine
+    queryCuisineInfo(search, callback){
         this.query(
-            "SELECT ingredients.name " +
-            "FROM associations " +
-            "JOIN ingredients " +
-            "ON associations.sourceID = (SELECT id FROM ingredients WHERE name = '" + data + "' LIMIT 1) " +
-            "AND ingredients.id = associations.associateID " +
-            "ORDER BY name ASC",
+            "SELECT * FROM cuisines " +
+            "WHERE name = '" + search + "' LIMIT 1",
             callback
         );
     }
 
-    queryNameMatches(name, callback){
+    // list of cuisine-cuisine associations
+    queryCuisineAssociations(search, callback){
         this.query(
-            "SELECT name FROM ingredients " +
-            "WHERE name LIKE '%" + name + "%' " +
-            "ORDER BY name ASC LIMIT 10",
+            "SELECT c.name FROM cuisines c " +
+            "JOIN cuisine_associations ca " +
+            "ON c.id = ca.association_id " +
+            "WHERE ca.cuisine_id = (SELECT id FROM cuisines WHERE name = '" + search + "')" +
+            "ORDER BY c.name ASC",
             callback
         );
     }
 
-    getIngredientsTableJSON(callback){
-        this.query("SELECT * FROM ingredients", callback);
+    // taste name search
+    queryTastes(search, callback){
+        this.query(
+            "SELECT name FROM tastes " +
+            "WHERE name LIKE '%" + search + "%' " +
+            "ORDER BY NAME ASC LIMIT " + MAX_RESULT_ROWS,
+            callback
+        );
     }
 
-    getAssociationsTableJSON(callback){
-        this.query("SELECT * FROM associations", callback);
+    // list of taste-cuisine associations
+    queryTasteAssociations(search, callback){
+        this.query(
+            "SELECT t.name FROM tastes t " +
+            "JOIN taste_associations ta " +
+            "ON t.id = ta.taste_id " +
+            "WHERE ta.cuisine_id = (SELECT id FROM cuisines WHERE name = '" + search + "')" +
+            "ORDER BY t.name ASC",
+            callback
+        );
+    }
+
+    // technique name search
+    queryTechniques(search, callback){
+        this.query(
+            "SELECT name FROM techniques " +
+            "WHERE name LIKE '%" + search + "%' " +
+            "ORDER BY NAME ASC LIMIT " + MAX_RESULT_ROWS,
+            callback
+        );
+    }
+
+    // list of technique-cuisine associations
+    queryTechniqueAssociations(search, callback){
+        this.query(
+            "SELECT t.name FROM techniques t " +
+            "JOIN technique_associations ta " +
+            "ON t.id = ta.technique_id " +
+            "WHERE ta.cuisine_id = (SELECT id FROM cuisines WHERE name = '" + search + "')" +
+            "ORDER BY t.name ASC",
+            callback
+        );
     }
 
     createTables(){
-        /*
-        // create the accounts tables
+        // create techniques table
         this.query(
-            "CREATE TABLE IF NOT EXISTS accounts(" +
-                "id INT AUTO_INCREMENT UNIQUE NOT NULL, " +
-                "username VARCHAR(25) UNIQUE NOT NULL, " +
-                "password VARCHAR(25) UNIQUE NOT NULL, " +
+            "CREATE TABLE IF NOT EXISTS techniques(" +
+                "id SMALLINT(4) AUTO_INCREMENT UNIQUE NOT NULL, " +
+                "name VARCHAR(30) NOT NULL, " +
                 "PRIMARY KEY (id)" +
-            ")",
-            err = {}
-        );*/
+            ")"
+        );
 
-        // create ingredients table
+        // create tastes table
         this.query(
-            "CREATE TABLE IF NOT EXISTS ingredients(" +
+            "CREATE TABLE IF NOT EXISTS tastes(" +
+                "id SMALLINT(4) AUTO_INCREMENT UNIQUE NOT NULL, " +
+                "name VARCHAR(30) NOT NULL, " +
+                "PRIMARY KEY (id)" +
+            ")"
+        );
+
+        // create cuisines table
+        this.query(
+            "CREATE TABLE IF NOT EXISTS cuisines(" +
                 "id INT AUTO_INCREMENT UNIQUE NOT NULL, " +
-                "name VARCHAR(50) UNIQUE NOT NULL, " +
-                "flavor ENUM('Sweet', 'Sour', 'Hot') NOT NULL, " +
-                "weight ENUM('Heavy', 'Medium', 'Light') NOT NULL, " +
-                "season ENUM('Summer', 'Spring', 'Winter', 'Fall') NOT NULL, " +
-                "volume ENUM('Quiet', 'Moderate', 'Loud') NOT NULL, " +
-                "calories INT, " +
-                "calorieServing VARCHAR(255), " +
-                "protein INT, " +
-                "techniques VARCHAR(255), " +
+                "name VARCHAR(30) UNIQUE NOT NULL, " +
+                "season ENUM(" +
+                    "'Autumn', 'Autumn-Spring', 'Autumn-Winter', 'Spring'," +
+                    "'Spring-Autumn', 'Spring-Summer', 'Summer', 'Summer-Autumn'," +
+                    "'Winter', 'Winter-Spring', 'Year-Round'" +
+                ")," +
+                "function ENUM(" +
+                    "'Cooling', 'Heating', 'Warming'" +
+                ")," +
+                "weight ENUM(" +
+                    "'Heavy', 'Light', 'Light-Medium', 'Medium'," +
+                    "'Medium-Heavy', 'Very Light'" +
+                ")," +
+                "volume ENUM(" +
+                    "'Loud', 'Mild-Moderate', 'Moderate-Loud', 'Quiet'," +
+                    "'Quiet-Moderate', 'Variable', 'Very Loud', 'Very Quiet'" +
+                ")," +
+                "tips VARCHAR(300), " +
                 "PRIMARY KEY (id) " +
-            ")",
-            err => {
-                if(err) return console.log(err.message);
-                // create the associations table
-                this.query(
-                    "CREATE TABLE IF NOT EXISTS associations(" +
-                        /*"id INT AUTO_INCREMENT UNIQUE NOT NULL, " +*/
-                        "sourceID INT NOT NULL, " +
-                        "associateID INT NOT NULL, " +
-                        "PRIMARY KEY (sourceID, associateID), " +
-                        "FOREIGN KEY (sourceID) REFERENCES ingredients(id) ON DELETE CASCADE, " +
-                        "FOREIGN KEY (associateID) REFERENCES ingredients(id) ON DELETE CASCADE" +
-                    ")",
-                    err => {
-                        if(err) return console.log(err.message);
-                        // test ingredients
-                        this.query(
-                            "INSERT INTO ingredients(name) " +
-                            "VALUES('Jawa Juice'), ('Szechuan McNugget Sauce'), ('Blue Milk'), ('Earl Gray Tea')",
-                            err => {
-                                this.query(
-                                    "INSERT INTO associations(sourceID, associateID) " +
-                                    "VALUES(1,2), (1,3)",
-                                    err => {}
-                                );
-                            }
-                        );
-                    }
-                );
-            }
+            ")"
+        );
+
+        this.query(
+            "CREATE TABLE IF NOT EXISTS technique_associations(" +
+                "cuisine_id INT(8) NOT NULL, " +
+                "technique_id SMALLINT(4) NOT NULL, " +
+                "INDEX (cuisine_id), " +
+                "INDEX (technique_id), " +
+                "FOREIGN KEY (cuisine_id) REFERENCES cuisines(id) " +
+                    "ON UPDATE CASCADE " +
+                    "ON DELETE RESTRICT, " +
+                "FOREIGN KEY (technique_id) REFERENCES techniques(id) " +
+                    "ON UPDATE CASCADE " +
+                    "ON DELETE RESTRICT, " +
+                "PRIMARY KEY (cuisine_id, technique_id)" +
+            ")"
+        );
+
+        this.query(
+            "CREATE TABLE IF NOT EXISTS taste_associations(" +
+                "cuisine_id INT(8) NOT NULL, " +
+                "taste_id SMALLINT(4) NOT NULL, " +
+                "INDEX (cuisine_id), " +
+                "INDEX (taste_id), " +
+                "FOREIGN KEY (cuisine_id) REFERENCES cuisines(id) " +
+                    "ON UPDATE CASCADE " +
+                    "ON DELETE RESTRICT, " +
+                "FOREIGN KEY (taste_id) REFERENCES tastes(id) " +
+                    "ON UPDATE CASCADE " +
+                    "ON DELETE RESTRICT, " +
+                "PRIMARY KEY (cuisine_id, taste_id)" +
+            ")"
+        );
+
+        this.query(
+            "CREATE TABLE IF NOT EXISTS cuisine_associations(" +
+                "cuisine_id INT(8) NOT NULL, " +
+                "association_id INT(8) NOT NULL, " +
+                "compatibility ENUM(" +
+                    "'Avoid', 'Compatible', 'Recommended', " +
+                    "'Highly Recommended', 'Highest Reccomendation'" +
+                ")," +
+                "INDEX (cuisine_id), " +
+                "INDEX (association_id), " +
+                "FOREIGN KEY (cuisine_id) REFERENCES cuisines(id) " +
+                    "ON UPDATE CASCADE " +
+                    "ON DELETE RESTRICT, " +
+                "FOREIGN KEY (association_id) REFERENCES cuisines(id) " +
+                    "ON UPDATE CASCADE " +
+                    "ON DELETE RESTRICT, " +
+                "PRIMARY KEY (cuisine_id, association_id)" +
+            ")"
         );
     }
 
