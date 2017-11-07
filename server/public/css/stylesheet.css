@@ -1,18 +1,47 @@
 body{
-    /*background: linear-gradient(180deg, white, gray) fixed 100% 100%;*/
+    /*background: linear-gradient(180deg, #999999, #000000) fixed 100% 100%;*/
+    /*background-image: url('http://blog.hostbaby.com/wp-content/uploads/2013/07/scuffedstatic_blue1400x900.jpg');
+    background-attachment: fixed;
+    background-position: center;
+    background-size: cover;*/
+    overflow: hidden;
 }
 
-#search-row button{
+.btn-slide{
     background-size: 200% 100%;
-    background-image: linear-gradient(to right, white 50%, red 50%);
+    background-image: linear-gradient(to right, #EEEEEE 50%, red 50%);
     border: 1px solid black;
-    border-radius: 2px;
+    border-radius: 5px;
     color: black;
     transition: 0.25s;
+    width: 150px;
+    height: 35px;
+    font-size: 1.15em;
 }
 
-#search-row button:hover{
+.btn-slide:hover{
     background-position: 100%;
+}
+
+.results-list{
+    padding: 0px;
+}
+
+.results-list li{
+    display: inline;
+}
+
+.results-list figure{
+    background-color: #EEEEEE;
+    min-width: 25px;
+    min-height: 35px;
+    border: 1px solid black;
+    border-radius: 3px;
+    padding: 5px;
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 #results-container{
@@ -28,10 +57,6 @@ body{
     margin-bottom: 10px;
 }
 
-header{
-    margin-top: 50px;
-}
-
 .ingredient-link{
     margin-right: 8px;
     margin-left: 8px;
@@ -39,4 +64,10 @@ header{
 
 .centered{
     text-align: center;
+}
+
+#wrapper{
+    background-color: white;
+    /*width: 75%;*/
+    margin: auto;
 }

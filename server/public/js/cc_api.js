@@ -41,63 +41,74 @@ var CCAPI = (function(){
     };
 
     // forces lower case and replaces spaces with underscores
-    var formatIngredientName = function(ingredientName){
-        var name = ingredientName.toLowerCase();
-        return name.replace(new RegExp(" ", "g"), "_");
+    var formatData = function(search){
+        if(search instanceof Array){
+            var formattedSearch = "";
+            for(var i = 0; i < search.length; i++){
+                formattedSearch += formatData(search[i]) + "&"
+            }
+            return formattedSearch.substring(0, formattedSearch.length - 1);
+        }
+        else if(typeof search === "string"){
+            var formattedSearch = search.toLowerCase();
+            return formattedSearch.replace(new RegExp(" ", "g"), "_");
+        }
+        return null;
     };
 
-    // requests the JSON representation of an ingredient
-    var requestInfo = function(ingredientName, callback){
+    var requestCuisineInfo = function(search, callback){
         ajax({
-            url:        SERVER_HOST + "ingredients/name/" + formatIngredientName(ingredientName),
-            method:     "GET",
-            callback:   callback
+            url:    SERVER_HOST + "cuisines/info/" + formatData(search),
+            method: "GET",
+            callback: callback
         });
     };
 
-    // requests the list of similar names (array of strings) for a target name
-    var requestNames = function(targetName, callback){
+    var requestCuisines = function(search, callback){
         ajax({
-            url:        SERVER_HOST + "ingredients/find/" + formatIngredientName(targetName),
-            method:     "GET",
-            callback:   callback
+            url:    SERVER_HOST + "cuisines/search/" + formatData(search),
+            method: "GET",
+            callback: callback
         });
     };
 
-    // requests the associations list (array of strings) for an ingredient
-    var requestAssociations = function(ingredientName, callback){
+    var requestCuisineAssociations = function(search, callback){
         ajax({
-            url:        SERVER_HOST + "associations/name/" + formatIngredientName(ingredientName),
-            method:     "GET",
-            callback:   callback
+            url:    SERVER_HOST + "cuisines/associations/" + formatData(search),
+            method: "GET",
+            callback: callback
         });
     };
 
-    // requests an an ingredient search based on the params
-    var requestSearch = function(searchParams, callback){
+    var requestTastes = function(search, callback){
         ajax({
-            url:        SERVER_HOST + "ingredients/search",
-            method:     "GET",
-            data:       searchParams,
-            callback:   callback
+            url:    SERVER_HOST + "tastes/search/" + formatData(search),
+            method: "GET",
+            callback: callback
         });
     };
 
-    // requests the entire ingredients table (json representation)
-    var requestIngredientsData = function(callback){
+    var requestTasteAssociations = function(search, callback){
         ajax({
-            url:        SERVER_HOST + "ingredients/get",
-            method:     "GET",
-            callback:   callback
+            url:    SERVER_HOST + "tastes/associations/" + formatData(search),
+            method: "GET",
+            callback: callback
         });
     };
 
-    // requests the entire associations table (json representation)
-    var requestAssociationsData = function(callback){
+    var requestTechniques = function(search, callback){
         ajax({
-            url:        SERVER_HOST + "associations/get",
-            method:     "GET",
-            callback:    callback
+            url:    SERVER_HOST + "techniques/search/" + formatData(search),
+            method: "GET",
+            callback: callback
+        });
+    };
+
+    var requestTechniqueAssociations = function(search, callback){
+        ajax({
+            url:    SERVER_HOST + "techniques/associations/" + formatData(search),
+            method: "GET",
+            callback: callback
         });
     };
 
@@ -108,12 +119,14 @@ var CCAPI = (function(){
 
     // public methods
     return {
-        requestInfo:                requestInfo,
-        requestAssociations:        requestAssociations,
-        requestSearch:              requestSearch,
-        requestIngredientsData:     requestIngredientsData,
-        requestAssociationsData:    requestAssociationsData,
-        requestNames:               requestNames,
-        setHost:                    setHost
+        requestCuisines:                requestCuisines,
+        requestCuisineInfo:             requestCuisineInfo,
+        requestCuisineAssociations:     requestCuisineAssociations,
+        requestTastes:                  requestTastes,
+        requestTasteAssociations:       requestTasteAssociations,
+        requestTechniques:              requestTechniques,
+        requestTechniqueAssociations:   requestTechniqueAssociations,
+        formatData:                     formatData,
+        setHost:                        setHost
     };
 })();

@@ -31,107 +31,90 @@ app.route("/database").get((req, res) => {
     res.end("Database state = " + database.state);
 });
 
-// associations table JSON requested
-app.route("/associations/get*").get((req, res) => {
-    queryManager.getAssociationsTableJSON((err, rows) => {
-        if(err) console.log(err.message);
+app.route("/cuisines/info*").get((req, res) => {
+    let search = extractSearchValue(req.url);
+
+    queryManager.queryCuisineInfo(search, (err, rows) => sendQueryResults(res, err, rows, search));
+});
+
+app.route("/cuisines/search*").get((req, res) => {
+    let search = extractSearchValue(req.url);
+
+    queryManager.queryCuisines(search, (err, rows) => sendQueryResults(res, err, rows, search));
+});
+
+app.route("/cuisines/associations*").get((req, res) => {
+    let search = extractSearchValue(req.url);
+
+    queryManager.queryCuisineAssociations(search, (err, rows) => sendQueryResults(res, err, rows, search));
+});
+
+app.route("/tastes/search*").get((req, res) => {
+    let search = extractSearchValue(req.url);
+
+    queryManager.queryTastes(search, (err, rows) => sendQueryResults(res, err, rows, search));
+});
+
+app.route("/tastes/associations*").get((req, res) => {
+    let search = extractSearchValue(req.url);
+
+    queryManager.queryTasteAssociations(search, (err, rows) => sendQueryResults(res, err, rows, search));
+});
+
+app.route("/techniques/search*").get((req, res) => {
+    let search = extractSearchValue(req.url);
+
+    queryManager.queryTechniques(search, (err, rows) => sendQueryResults(res, err, rows, search));
+});
+
+app.route("/techniques/associations*").get((req, res) => {
+    let search = extractSearchValue(req.url);
+
+    queryManager.queryTechniqueAssociations(search, (err, rows) => sendQueryResults(res, err, rows, search));
+});
+
+let sendQueryResults = (res, err, rows, search) => {
+    if(!err && rows.length > 0){
+        // match found
+        let result;
+        if(!("id" in rows[0]) && "name" in rows[0]){
+            // its {name: a, name: b}
+            result = formatNameList(rows);
+        }
+        else if("id" in rows[0]){
+            // its the table data
+            result = rows[0];
+        }
+
         res.writeHead(200);
-        res.end(JSON.stringify((rows || []), null, 2));
-    });
-});
+        res.end(JSON.stringify(result, null, 4));
+    }
+    else if(!err){
+        // no match
+        res.writeHead(400);
+        res.end("No results for \"" + search + "\".");
+    }
+    else{
+        // query error
+        console.log(err.message);
+        res.writeHead(500);
+        res.end("Server error.")
+    }
+};
 
-// request assocations for ingredient by name
-app.route("/associations/name*").get((req, res) => {
-    // extract the name from the url
-    let name = extractUrlValue(req.url);
-
-    queryManager.queryAssociates(name, (err, rows) => {
-        if(!err && rows.length > 0){
-            // successful query
-            // convert [{name: "..."}] to ["..."]
-            let resultData = [];
-            for(var associate of rows){
-                resultData.push(associate.name);
-            }
-
-            // respond
-            res.writeHead(200);
-            res.end(JSON.stringify(resultData, null, 2));
+// converts {name: a, name: b} to [a, b]
+let formatNameList = (rows) => {
+    let list = [];
+    for(let row of rows){
+        if("name" in row){
+            list.push(row.name);
         }
-        else{
-            // error or no data
-            if(err) console.log(err.message);
-            res.writeHead(400);
-            res.end("No associations for \"" + name + "\".");
-        }
-    });
-});
-
-// ingredients table JSON requested
-app.route("/ingredients/get*").get((req, res) => {
-    queryManager.getIngredientsTableJSON((err, rows) => {
-        if(err) console.log(err.message);
-        res.writeHead(200);
-        res.end(JSON.stringify((rows || []), null, 2));
-    });
-});
-
-// get ingredient by name request
-app.route("/ingredients/name*").get((req, res) => {
-    let name = extractUrlValue(req.url);
-
-    queryManager.queryName(name, (err, rows) => {
-        if(!err && rows.length > 0){
-            res.writeHead(200);
-            res.end(JSON.stringify(rows[0], null, 2));
-        }
-        else{
-            if(err) console.log(err.message);
-            res.writeHead(400);
-            res.end("No results for \"" + name + "\".");
-        }
-    });
-});
-
-app.route("/ingredients/find*").get((req, res) => {
-    let name = extractUrlValue(req.url);
-
-    queryManager.queryNameMatches(name, (err, rows) => {
-        if(!err && rows.length > 0){
-            // successful query
-            // convert [{name: "..."}] to ["..."]
-            let resultData = [];
-            for(var associate of rows){
-                resultData.push(associate.name);
-            }
-
-            res.writeHead(200);
-            res.end(JSON.stringify(resultData, null, 2));
-        }
-        else{
-            if(err) console.log(err.message);
-            res.writeHead(400);
-            res.end("No results for \"" + name + "\".");
-        }
-    });
-});
-
-app.route("/ingredients/search*").post((req, res) => {
-    // read the body
-    req.on("data", (body) => {
-        try{
-            let json = JSON.parse(body);
-
-
-        }
-        catch(err){
-
-        }
-    });
-});
+    }
+    return list;
+};
 
 // extracts the name from the url
-let extractUrlValue = (url) => {
+let extractSearchValue = (url) => {
     // ex: 'http://host/directory/hello_there' -> 'hello there'
     let split = url.split("/"),
         extract = split[split.length - 1];
