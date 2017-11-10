@@ -3,8 +3,8 @@ body{
     /*background-image: url('http://blog.hostbaby.com/wp-content/uploads/2013/07/scuffedstatic_blue1400x900.jpg');
     background-attachment: fixed;
     background-position: center;
-    background-size: cover;*/
-    overflow: hidden;
+    background-size: cover;
+    overflow: hidden;*/
 }
 
 .btn-slide{
@@ -44,12 +44,16 @@ body{
     margin-bottom: 10px;
 }
 
+.results-list figure button{
+    width: 75px;
+}
+
 #results-container{
     display: none;
     background-color: white;
     margin-top: 50px;
     padding: 10px;
-    width: 550px;
+    max-width: 400px;
     border-radius: 3px;
     border: 1px solid black;
     text-align: center;

@@ -3,7 +3,7 @@
 let mysql = require("mysql"),
     Settings = require("./Settings.js");
 
-const MAX_RESULT_ROWS = 20;
+const MAX_RESULT_ROWS = 10;
 
 let QueryManager = class QueryManager{
     constructor(mysqlConn){
@@ -16,6 +16,15 @@ let QueryManager = class QueryManager{
 
     // cuisine name search
     queryCuisines(search, callback){
+        search = (search instanceof Array) ? search[0] : search;
+
+        /* search = (search instanceof Array) ? search : [search];
+        let where = "WHERE";
+        for(let name of search){
+            where += " name LIKE '%" + name + "%' AND"
+        }
+        where = where.substring(0, where.length - 3) + " ";*/
+
         this.query(
             "SELECT name FROM cuisines " +
             "WHERE name LIKE '%" + search + "%' " +
@@ -58,11 +67,12 @@ let QueryManager = class QueryManager{
     // list of taste-cuisine associations
     queryTasteAssociations(search, callback){
         this.query(
-            "SELECT t.name FROM tastes t " +
+            "SELECT c.name FROM tastes t " +
             "JOIN taste_associations ta " +
             "ON t.id = ta.taste_id " +
-            "WHERE ta.cuisine_id = (SELECT id FROM cuisines WHERE name = '" + search + "')" +
-            "ORDER BY t.name ASC",
+            "JOIN cuisines c " +
+            "ON c.id = ta.cuisine_id " +
+            "WHERE t.name = '" + search + "'",
             callback
         );
     }
@@ -80,11 +90,12 @@ let QueryManager = class QueryManager{
     // list of technique-cuisine associations
     queryTechniqueAssociations(search, callback){
         this.query(
-            "SELECT t.name FROM techniques t " +
+            "SELECT c.name FROM techniques t " +
             "JOIN technique_associations ta " +
             "ON t.id = ta.technique_id " +
-            "WHERE ta.cuisine_id = (SELECT id FROM cuisines WHERE name = '" + search + "')" +
-            "ORDER BY t.name ASC",
+            "JOIN cuisines c " +
+            "ON c.id = ta.cuisine_id " +
+            "WHERE t.name = '" + search + "'",
             callback
         );
     }

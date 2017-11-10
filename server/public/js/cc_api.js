@@ -41,17 +41,26 @@ var CCAPI = (function(){
     };
 
     // forces lower case and replaces spaces with underscores
+    // multiple searches uses a query string
     var formatData = function(search){
-        if(search instanceof Array){
-            var formattedSearch = "";
-            for(var i = 0; i < search.length; i++){
-                formattedSearch += formatData(search[i]) + "&"
-            }
-            return formattedSearch.substring(0, formattedSearch.length - 1);
-        }
-        else if(typeof search === "string"){
+        if(typeof search === "string"){
+            // search is 1 string value
             var formattedSearch = search.toLowerCase();
             return formattedSearch.replace(new RegExp(" ", "g"), "_");
+        }
+        else if(search instanceof Array){
+            // search is an array
+            if(search.length === 1){
+                // don't actually need a query string if theres only 1 value in the array
+                return formatData(search[0]);
+            }
+
+            // ? c[]=name1 & c[]=name2 & c[]=namen
+            var formattedSearch = formatData(search[0]) + "?"
+            for(var i = 1; i < search.length; i++){
+                formattedSearch += "c[]=" + formatData(search[i]) + "&";
+            }
+            return formattedSearch.substring(0, formattedSearch.length - 1);
         }
         return null;
     };
