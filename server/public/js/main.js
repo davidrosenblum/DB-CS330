@@ -54,14 +54,48 @@ var client = (function(){
         }
         else if(searchType === "tastes"){
             CCAPI.requestTasteAssociations(searchInput, function(data, status){
-                console.log(data);
-                setOutput((status === 200) ?  createItemList(data) : data);
+                /*if(status !== 400){
+                    // cusines found for taste
+                    setOutput(createItemList(data));
+                }
+                else{
+                    // NO cuisines found
+                    CCAPI.requestTastes(searchInput, function(data, status){
+                        if(status === 200){
+                            // list possible tastes
+                            setOutput("<h3>Did you mean?</h3>");
+                            appendOutput(createItemList(data));
+                        }
+                        else{
+                            // error or not found message
+                            setOutput(data);
+                        }
+                    });
+                }*/
+                setOutput((status === 200) ? createItemList(data) : data);
             });
         }
         else if(searchType === "techniques"){
             CCAPI.requestTechniqueAssociations(searchInput, function(data, status){
-                console.log(data);
-                setOutput((status === 200) ?  createItemList(data) : data);
+                /*if(status !== 400){
+                    // cusines found for technique
+                    setOutput(createItemList(data));
+                }
+                else{
+                    // NO cuisines found
+                    CCAPI.requestTechniques(searchInput, function(data, status){
+                        if(status === 200){
+                            // list possible techniques
+                            setOutput("<h3>Did you mean?</h3>");
+                            appendOutput(createItemList(data));
+                        }
+                        else{
+                            // error or not found message
+                            setOutput(data);
+                        }
+                    });
+                }*/
+                setOutput((status === 200) ? createItemList(data) : data);
             });
         }
         else displayMessage("Unsupported search type.");
