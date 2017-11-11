@@ -42,21 +42,36 @@ __Settings.json__ file - created when server is first launched witih default val
     "port": 			8080,
     "mysql_host": 		"127.0.0.1",
     "mysql_user": 		"root",
-    "mysql_password": 	"admin",
+    "mysql_password": 	"",
     "mysql_port": 		3306,
     "mysql_database": 	"cuisine_crusader"
 }
 
 ```
 
-## REST API
+## Database Schema
 
-| Endpoint                                                                 | Description                                                                     | Returns       |
-|--------------------------------------------------------------------------|---------------------------------------------------------------------------------|---------------|
-| https://cuisine-crusader.herokuapp.com/database                          | Current database connection state                                               | String        |
-| https://cuisine-crusader.herokuapp.com/ingredients/name/INGREDIENT_NAME  | Ingredient data/info from name                                                  | Object        |
-| https://cuisine-crusader.herokuapp.com/ingredients/find/TARGET_STRING    | Ingredient names from a target name  (ex: "j" gets names including that string) | Array<String> |
-| https://cuisine-crusader.herokuapp.com/associations/name/INGREDIENT_NAME | Assocations from an ingredient name                                             | Array<String> |
-| https://cuisine-crusader.herokuapp.com/ingredients/search                | Search for ingredients by parameters (search params JSON in request BODY!)      | Array<String> |
-| https://cuisine-crusader.herokuapp.com/ingredients/get                   | Ingredients table as a JSON array                                               | Array<Object> |
-| https://cuisine-crusader.herokuapp.com/associations/get                  | Association table as a JSON array                                               | Array<Object> |
+| Table                  | Schema                                             |
+|------------------------|----------------------------------------------------|
+| cuisines               | {id, name, season, function, weight, volume, tips} |
+| cuisine_associations   | {cuisine_id, association_id, compatibility}        |
+| tastes                 | {id, name}                                         |
+| taste_associations     | {cuisine_id, taste_id}                             |
+| techniques             | {id, name}                                         |
+| technique_associations | {cuisine_id, technique_id}                         |
+
+## REST API
+| URL                                                                     | Description                  | Returns                                        |
+|-------------------------------------------------------------------------|------------------------------|------------------------------------------------|
+| https://cuisine-crusader.herokuapp.com/cuisines/search/_SEARCH_         | Cuisine name search          | ["cusine1", "cuisine2", ..."cuisineN"]         |
+| https://cuisine-crusader.herokuapp.com/cuisines/info/_SEARCH_           | Cuisine info search          | {name: "name", .... tips: "do something"}      |
+| https://cuisine-crusader.herokuapp.com/cuisines/associations/_SEARCH_   | Cuisine associations search  | ["associate1", "associate2", ..."associateN"]  |
+| https://cuisine-crusader.herokuapp.com/tastes/search/_SEARCH_           | Taste name search            | ["taste1", "taste2", ..."tasteN"]              |
+| https://cuisine-crusader.herokuapp.com/tastes/associations/_SEARCH_     | Taste association search     | ["associate1", "associate2", ..."associateN"]  |
+| https://cuisine-crusader.herokuapp.com/techniques/search/_SEARCH_       | Technique name search        | ["technique1, "technique2, ..., "techniquesN"] |
+| https://cuisine-crusader.herokuapp.com/techniques/associations/_SEARCH_ | Technique association search | ["associate1", "associate2", ..."associateN"]  |
+
+## Client Query Strings
+| Parameter | Value              | Description                                  | Example       |
+|-----------|--------------------|----------------------------------------------|---------------|
+| search    | item name (string) | Auto fills in the input field with the value | ?search=anise |

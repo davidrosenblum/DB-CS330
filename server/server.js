@@ -119,7 +119,31 @@ let extractSearchValue = (url) => {
     let split = url.split("/"),
         extract = split[split.length - 1];
 
-    return extract.replace(new RegExp("_", "g"), " ");
+    // query string (multiple search params)?
+    if(extract.indexOf("?") > -1){
+        // ex: 'http://host/directory/hello_there?c[]=darnkess&c[]=my_old_friend' ->
+        // ['hello there', 'darkness', 'my old friend']
+
+        let extractSplit = extract.split("?"),
+            qs = extractSplit[1].split("&");
+
+        let searches = [formatSearchValue(extractSplit[0])];
+        for(let qsPair of qs){
+            let qsSplit = qsPair.split("=");
+
+            if(qsSplit[0] === "c[]"){
+                searches.push(formatSearchValue(qsSplit[1]));
+            }
+        }
+
+        return searches;
+    }
+
+    return formatSearchValue(extract);
+};
+
+let formatSearchValue = (search) => {
+    return search.replace(new RegExp("_", "g"), " ");
 };
 
 // reconnects the DB when it crashes
