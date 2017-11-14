@@ -44,6 +44,26 @@ let QueryManager = class QueryManager{
 
     // list of cuisine-cuisine associations
     queryCuisineAssociations(search, callback){
+        /*search = (search instanceof Array) ? search : [search];
+
+        let where = "WHERE ";
+        for(let name of search){
+            where += "(ca.cuisine_id = (SELECT id FROM cuisines WHERE name = '" + name + "') OR " +
+            "ca.association_id = (SELECT id FROM cuisines WHERE name = '" + name + "')) AND "
+        }
+
+        let sql =
+            "SELECT c.name FROM cuisines c " +
+            "JOIN cuisine_associations ca " +
+            "ON c.id = ca.association_id " +
+            where.substring(0, where.length - 4) +
+            "ORDER BY c.name ASC";
+
+        this.query(
+            sql,
+            callback
+        );*/
+
         this.query(
             "SELECT c.name FROM cuisines c " +
             "JOIN cuisine_associations ca " +
@@ -100,6 +120,7 @@ let QueryManager = class QueryManager{
         );
     }
 
+    // create the database tables
     createTables(){
         // create techniques table
         this.query(
@@ -138,7 +159,7 @@ let QueryManager = class QueryManager{
                 ")," +
                 "volume ENUM(" +
                     "'Loud', 'Mild-Moderate', 'Moderate-Loud', 'Quiet'," +
-                    "'Quiet-Moderate', 'Variable', 'Very Loud', 'Very Quiet'" +
+                    "'Quiet-Moderate', 'Variable', 'Very Loud', 'Very Quiet', 'Moderate'" +
                 ")," +
                 "tips VARCHAR(300), " +
                 "PRIMARY KEY (id) " +
