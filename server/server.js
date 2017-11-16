@@ -73,6 +73,10 @@ app.route("/techniques/associations*").get((req, res) => {
     queryManager.queryTechniqueAssociations(search, (err, rows) => sendQueryResults(res, err, rows, search));
 });
 
+app.route("*").get((req, res) => {
+    res.sendFile(__dirname + "/public/404.html");
+});
+
 let sendQueryResults = (res, err, rows, search) => {
     if(!err && rows.length > 0){
         // match found
