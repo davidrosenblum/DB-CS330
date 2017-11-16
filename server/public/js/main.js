@@ -3,30 +3,76 @@ var client = (function(){
     var basket = {
         cuisines:   {},
         add: function(name){
-            var element = this.getElement();
-            if(element.innerHTML.trim() === "(Empty)"){
-                element.innerHTML = "";
+            if(name in this.cuisines === false){
+                var element = this.getElement();
+                if(element.innerHTML.trim() === "(Empty)"){
+                    element.innerHTML = "";
+                }
+
+                var itemFigure = new DisplayFigure(name);
+                itemFigure.showRemove();
+
+                this.cuisines[name] = itemFigure;
+                element.appendChild(itemFigure.figure);
             }
-
-            this.cuisines[name] = 1;
-            element.appendChild(createItemBlock(name));
-
         },
         remove: function(name){
-            var element = this.getElement();
+            if(name in this.cuisines){
+                var element = this.getElement(),
+                    figure = this.cuisines[name];
 
-            delete this.cuisines[name];
-            console.log("#items-container figure[data-name='" + name + "']");
-            element.removeChild(document.querySelector("#items-container figure[data-name='" + name + "']"));
+                figure.remove();
+                delete this.cuisines[name];
 
-            if(element.innerHTML.length === 0){
-                element.innerHTML = "(Empty)";
+                if(name in displayFigures){
+                    displayFigures[name].showAdd();
+                }
+
+                if(element.innerHTML.length === 0){
+                    element.innerHTML = "(Empty)";
+                }
             }
         },
         getElement: function(){
             return document.querySelector("#items-container");
         }
     };
+
+    var DisplayFigure = function(name){
+        this.figure = createItemBlock(name);
+        this.addBtn = createAddButton();
+        this.removeBtn = createRemoveButton();
+        this.infoBtn = createInfoButton(name);
+
+        var that = this; // preserve scope
+        this.addBtn.addEventListener("click", function(evt){
+            that.showRemove();
+            basket.add(name);
+        });
+
+        this.removeBtn.addEventListener("click", function(evt){
+            that.showAdd();
+            basket.remove(name);
+        });
+
+        this.figure.appendChild(document.createElement("br"));
+        this.figure.appendChild(this.infoBtn);
+
+        (this.name in basket.cuisines) ? this.showRemove() : this.showAdd();
+    };
+    DisplayFigure.prototype.showRemove = function(){
+        if(this.addBtn.parentNode === this.figure) this.figure.removeChild(this.addBtn);
+        this.figure.appendChild(this.removeBtn);
+    };
+    DisplayFigure.prototype.showAdd = function(){
+        this.figure.appendChild(this.addBtn);
+        if(this.removeBtn.parentNode === this.figure) this.figure.removeChild(this.removeBtn);
+    };
+    DisplayFigure.prototype.remove = function(){
+        this.figure.parentNode.removeChild(this.figure);
+    };
+
+    var displayFigures = {};
 
     var search = function(){
         // extract search data from DOM
@@ -54,47 +100,11 @@ var client = (function(){
         }
         else if(searchType === "tastes"){
             CCAPI.requestTasteAssociations(searchInput, function(data, status){
-                /*if(status !== 400){
-                    // cusines found for taste
-                    setOutput(createItemList(data));
-                }
-                else{
-                    // NO cuisines found
-                    CCAPI.requestTastes(searchInput, function(data, status){
-                        if(status === 200){
-                            // list possible tastes
-                            setOutput("<h3>Did you mean?</h3>");
-                            appendOutput(createItemList(data));
-                        }
-                        else{
-                            // error or not found message
-                            setOutput(data);
-                        }
-                    });
-                }*/
                 setOutput((status === 200) ? createItemList(data) : data);
             });
         }
         else if(searchType === "techniques"){
             CCAPI.requestTechniqueAssociations(searchInput, function(data, status){
-                /*if(status !== 400){
-                    // cusines found for technique
-                    setOutput(createItemList(data));
-                }
-                else{
-                    // NO cuisines found
-                    CCAPI.requestTechniques(searchInput, function(data, status){
-                        if(status === 200){
-                            // list possible techniques
-                            setOutput("<h3>Did you mean?</h3>");
-                            appendOutput(createItemList(data));
-                        }
-                        else{
-                            // error or not found message
-                            setOutput(data);
-                        }
-                    });
-                }*/
                 setOutput((status === 200) ? createItemList(data) : data);
             });
         }
@@ -116,13 +126,19 @@ var client = (function(){
             return null;
         }
 
+        displayFigures = {};
+
         var list = document.createElement("ul");
         list.classList.add("results-list");
 
         for(var i = 0; i < data.length; i++){
-            var li = document.createElement("li");
-            li.appendChild(createItemBlock(data[i]));
+            var li = document.createElement("li"),
+                figureObject = new DisplayFigure(data[i]);
+
+            li.appendChild(figureObject.figure);
             list.appendChild(li);
+
+            displayFigures[data[i]] = figureObject;
         }
 
         return list;
@@ -177,18 +193,6 @@ var client = (function(){
         figure.classList.add("item-block");
         figure.setAttribute("data-name", name);
         figure.innerHTML = name;
-
-
-        figure.appendChild(document.createElement("br"));
-        figure.appendChild(createInfoButton(name));
-
-        if(name in basket.cuisines === false){
-            figure.appendChild(createAddButton(name));
-        }
-        else{
-            figure.appendChild(createRemoveButton(name));
-        }
-
         return figure;
     };
 
@@ -219,26 +223,16 @@ var client = (function(){
         var addBtn = document.createElement("button");
         addBtn.innerHTML = "Add";
         addBtn.classList.add("btn-warning");
-        addBtn.addEventListener("click", function(evt){
-            // button clicked...
-            this.parentNode.appendChild(createRemoveButton(name));
-            this.parentNode.removeChild(this);
-            basket.add(name);
-        });
+        addBtn.classList.add("add-btn");
         return addBtn;
     };
 
     // creates an HTMLButtonElement for removing a basket item
     var createRemoveButton = function(name){
         var removeBtn = document.createElement("button");
-        removeBtn.classList.add("btn-danger");
         removeBtn.innerHTML = "Remove";
-        removeBtn.addEventListener("click", function(evt){
-            // button clicked...
-            this.parentNode.appendChild(createAddButton(name));
-            this.parentNode.removeChild(this);
-            basket.remove(name);
-        });
+        removeBtn.classList.add("btn-danger");
+        removeBtn.classList.add("remove-btn");
         return removeBtn;
     };
 
