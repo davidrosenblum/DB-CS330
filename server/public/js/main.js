@@ -1,4 +1,6 @@
 var client = (function(){
+    var resultsContainer, modal, modalBody, modalDarkness;
+
     // bakset object ("my list")
     var basket = {
         cuisines:   {},
@@ -14,6 +16,8 @@ var client = (function(){
 
                 this.cuisines[name] = itemFigure;
                 element.appendChild(itemFigure.figure);
+
+                saveLocalBasket();
             }
         },
         remove: function(name){
@@ -31,6 +35,8 @@ var client = (function(){
                 if(element.innerHTML.length === 0){
                     element.innerHTML = "(Empty)";
                 }
+
+                saveLocalBasket();
             }
         },
         getElement: function(){
@@ -43,6 +49,7 @@ var client = (function(){
         this.addBtn = createAddButton();
         this.removeBtn = createRemoveButton();
         this.infoBtn = createInfoButton(name);
+        this.name = name;
 
         var that = this; // preserve scope
         this.addBtn.addEventListener("click", function(evt){
@@ -58,7 +65,7 @@ var client = (function(){
         this.figure.appendChild(document.createElement("br"));
         this.figure.appendChild(this.infoBtn);
 
-        (this.name in basket.cuisines) ? this.showRemove() : this.showAdd();
+        (name in basket.cuisines) ? this.showRemove() : this.showAdd();
     };
     DisplayFigure.prototype.showRemove = function(){
         if(this.addBtn.parentNode === this.figure) this.figure.removeChild(this.addBtn);
@@ -238,6 +245,10 @@ var client = (function(){
 
     // wipes the results container and contains an html string OR html element
     var setOutput = function(html){
+        displayModal(html);
+        return;
+
+        // depreicated
         var container = document.querySelector("#results-container");
         container.style.display = "block";
 
@@ -252,6 +263,10 @@ var client = (function(){
 
     // appends an html string OR html element into the results container
     var appendOutput = function(html){
+        appendModal(html);
+        return;
+
+        // depreicated
         var container = document.querySelector("#results-container");
         container.style.display = "block";
 
@@ -260,6 +275,53 @@ var client = (function(){
         }
         else if(html instanceof HTMLElement){
             container.appendChild(html);
+        }
+    };
+
+    var displayModal = function(html){
+        resultsContainer.style.display = "none";
+        modal.style.visibility = "visible";
+        modalDarkness.style.visibility = "visible";
+
+        if(typeof html === "string"){
+            modalBody.innerHTML = html;
+        }
+        else if(html instanceof HTMLElement){
+            modalBody.innerHTML = "";
+            modalBody.appendChild(html);
+        }
+    };
+
+    var appendModal = function(html){
+        if(typeof html === "string"){
+            modalBody.innerHTML += html;
+        }
+        else if(html instanceof HTMLElement){
+            modalBody.appendChild(html);
+        }
+    };
+
+    var closeModal = function(){
+        modalBody.innerHTML = "";
+        modal.style.visibility = "hidden";
+        modalDarkness.style.visibility = "hidden";
+    };
+
+    var saveLocalBasket = function(){
+        var data = [];
+        for(var name in basket.cuisines){
+            data.push(name);
+        }
+
+        window.localStorage.setItem("cuisine-crusader", JSON.stringify(data));
+    };
+
+    var loadLocalBasket = function(){
+        var save = window.localStorage.getItem("cuisine-crusader");
+
+        var data = JSON.parse(save);
+        for(let i = 0; i < data.length; i++){
+            basket.add(data[i]);
         }
     };
 
@@ -280,14 +342,36 @@ var client = (function(){
     };
 
     var init = function(){
+        document.querySelector("#search-btn").addEventListener("click", search);
+
+        resultsContainer = document.querySelector("#results-container");
+        modal = document.querySelector(".cc-modal");
+        modalBody = document.querySelector(".cc-modal-body");
+        modalDarkness = document.querySelector(".cc-modal-dark-bg");
+
+        document.querySelector("#modal-btn").addEventListener("click", closeModal);
+        document.querySelector("#close-modal").addEventListener("click", closeModal);
+
+        loadLocalBasket();
+
+        // parse the query strings...
         var qs = parseQueryStrings();
         if("search" in qs){
+            // auto search query string
             document.querySelector("#search-input").value = qs["search"];
+            document.querySelector("#search-btn").click();
         }
-
-        document.querySelector("#search-btn").addEventListener("click", search);
     };
     window.addEventListener("load", init);
+
+    // obligatory cool console 'art'
+    console.log(
+        "  _____________________________________\n" +
+        " /\t\t\t\t\t\t\t\t\t   \\\n" +
+        "|\t\t\tCUISINE CRUSADER\t\t\t|\n" +
+        "|\t\t  ----[  RJ/DR  ]----\t\t\t|\n" +
+        " \\_____________________________________/"
+    );
 
     return {
         basket: () => basket

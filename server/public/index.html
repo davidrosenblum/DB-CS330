@@ -9,21 +9,21 @@
 </head>
 <body>
     <div id="wrapper">
-        <header class="jumbotron">
-            <div class="container">
-                <h1>Cuisine Crusader</h1>
-                <p>(Still a work in progress)</p>
-            </div>
-        </header>
         <main class="container">
+            <header class="text-center">
+                <div class="banner-container">
+                    <img id="banner" src="images/cuisine_crusader.png" height="200px" title="Cuisine Crusader" alt="Cuisine Crusader"/>
+                    <!--<p>(Still a work in progress)</p>-->
+                </div>
+            </header>
             <div id="search-row" class="row">
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <h2>My Items</h2>
                     <div id="items-container">
                         (Empty)
                     </div>
                 </div>
-                <div class="col-md-6"> <!-- make col md 4 later! -->
+                <div class="col-md-5"> <!-- make col md 4 later! -->
                     <h2>Search</h2>
                     <div class="form-group">
                         <input id="search-input" type="text" class="form-control input-lg" placeholder="Search here...">
@@ -39,12 +39,19 @@
                         <button id="search-btn" class="btn-slide">Search</button>
                     </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-5">
+                    <h2>Instructions</h2>
+                    <div>
+                        You can search for cuisines by either name, taste, or techniques.
+                        The "cuisines" search will display cuisines that match with the given name.
+                        The "tastes" search will display cuisines associated with the given taste.
+                        The "techniques" search will display cuisines associated with the given technique.
+                    </div>
                 </div>
             </div>
             <div id="results-row" class="row">
                 <div class="col-md-4"></div>
-                <div id="results-container" class="col-md-4"></div>
+                <div id="results-container" class="container col-md-4"></div>
                 <div class="col-md-4"></div>
             </div>
             <footer class="container">
@@ -52,10 +59,23 @@
                 <p>Robert Juall | David Rosenblum</p>
             </footer>
         </main>
+        <div class="cc-modal-dark-bg"></div>
+        <div class="cc-modal">
+            <div class="cc-modal-content">
+                <button id="close-modal" class="cc-close-x">&times;</button>
+                <div class="cc-modal-header">
+                    <!--<h3>Results</h3>-->
+                </div>
+                <div class="cc-modal-body"></div>
+                <div class="cc-modal-footer">
+                    <button id="modal-btn" class="btn">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
     <!-- avoid render-blocking scripts -->
-    <!--<script src="js/jquery.min.js"></script>-->
-    <!--<script src="js/bootstrap.min.js"></script>-->
+    <!--<script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>-->
     <script src="js/cc_api.js"></script>
     <script src="js/main.js"></script>
 </body>
