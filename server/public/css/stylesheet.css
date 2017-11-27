@@ -1,13 +1,10 @@
 body{
-    /*background: linear-gradient(180deg, #999999, #000000) fixed 100% 100%;*/
-    /*background-image: url('http://blog.hostbaby.com/wp-content/uploads/2013/07/scuffedstatic_blue1400x900.jpg');
-    background-attachment: fixed;
+    /*background: linear-gradient(180deg, #f0f5f5,   #9f9693) fixed 100% 100%;*/
+    background-repeat: no-repeat;
+    background-image: url("../images/crusader.png");
     background-position: center;
-    background-size: cover;
-    overflow: hidden;*/
-    /*background: linear-gradient(180deg, #d6d6c2, #a3a375) fixed 100% 100%;*/
-    /*background: linear-gradient(180deg, #f0f5f5, #adad85) fixed 100% 100%;*/
-    background: linear-gradient(180deg, #f0f5f5,   #9f9693) fixed 100% 100%;
+    background-size: fill;
+    background-attachment: fixed;
 }
 
 #wrapper{
@@ -27,9 +24,9 @@ body{
     margin-bottom: 10px;
 }
 
-
-.jumbotron{
-    background-color: transparent !important;
+header{
+    margin-top: 65px;
+    margin-bottom: 50px;
 }
 
 .btn-slide{
@@ -78,9 +75,9 @@ body{
     text-align: center;
     position: absolute;
     left: 0px;
-    top: 50px;
+    top: 10px;
     width: 100%;
-    z-index: 999;
+    z-index: 99999 !important;
     padding: 5px;
 }
 
@@ -94,6 +91,17 @@ body{
     box-shadow: 1px 1px 1px 1px black;
 }
 
+.cc-close-container{
+    text-align: right;
+    width: 100%;
+}
+
+.cc-close-x{
+    background: none;
+    border: none;
+    font-size: 1.5em;
+}
+
 .cc-modal-dark-bg{
     visibility: hidden;
     background-color: black;
@@ -105,34 +113,32 @@ body{
     top: 0px;
 }
 
-.cc-close-x{
-    background: none;
-    border: none;
-    font-size: 1.5em;
-    position: absolute;
-    top: 0px;
-    padding: 0px;
-}
-
-hr{
-    background-color: black;
+.cc-btn-info{
     color: black;
+    border: 1px solid black;
+    border-radius: 4px;
+    background: linear-gradient(180deg, white, gray);
+    margin: 3px;
 }
 
-@keyframes bounce{
-    0%: {
-        transform: scale(0.1)
-    },
-    50%: {
-        transform: scale(0.5)
-    },
-    100%: {
-        transform: scale(1)
-    }
+.cc-btn-add{
+    color: black;
+    border: 1px solid black;
+    border-radius: 4px;
+    background: linear-gradient(180deg, gold, orange);
+    margin: 3px;
 }
 
-header{
-    animation: bounce 2s;
+.cc-btn-remove{
+    color: black;
+    border: 1px solid black;
+    border-radius: 4px;
+    background: linear-gradient(180deg, red, crimson);
+    margin: 3px;
+}
+
+.cc-btn-info:hover, .cc-btn-add:hover, .cc-btn-remove:hover{
+    background: white;
 }
 
 ::selection{
