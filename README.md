@@ -1,4 +1,4 @@
-# Cuisine Crusaders
+# Cuisine Crusader
 
 https://cuisine-crusader.herokuapp.com/
 
@@ -74,4 +74,4 @@ __Settings.json__ file - created when server is first launched witih default val
 ## Client Query Strings
 | Parameter | Value              | Description                                  | Example       |
 |-----------|--------------------|----------------------------------------------|---------------|
-| search    | item name (string) | Auto fills in the input field with the value | ?search=anise |
+| search    | item name (string) | auto search on page load | ?search=anise |

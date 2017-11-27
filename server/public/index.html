@@ -3,27 +3,41 @@
 <head>
     <title>Cuisine Crusader</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="images/favicon.png" rel="icon" sizes="64x64" type="image/png"/>
+    <link href="images/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png"/>
+    <link href="images/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+    <link href="images/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
     <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
     <link href="css/stylesheet.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
     <div id="wrapper">
-        <header class="jumbotron">
+        <nav class="navbar navbar-inverse navbar-fixed-top">
             <div class="container">
-                <h1>Cuisine Crusader</h1>
-                <p>(Still a work in progress)</p>
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="/">Cuisine Crusader</a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a id="profile-btn">Profile</a></li>
+                        <li><a id="help-btn">Help</a></li>
+                    </ul>
+                </div>
             </div>
-        </header>
+        </nav>
         <main class="container">
+            <header class="text-center">
+                <div class="banner-container">
+                    <img id="banner" src="images/cuisine_crusader.png" width="60%" title="Cuisine Crusader" alt="Cuisine Crusader"/>
+                </div>
+            </header>
             <div id="search-row" class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <h2>My Items</h2>
                     <div id="items-container">
                         (Empty)
                     </div>
                 </div>
-                <div class="col-md-6"> <!-- make col md 4 later! -->
+                <div class="col-md-5"> <!-- make col md 4 later! -->
                     <h2>Search</h2>
                     <div class="form-group">
                         <input id="search-input" type="text" class="form-control input-lg" placeholder="Search here...">
@@ -39,12 +53,20 @@
                         <button id="search-btn" class="btn-slide">Search</button>
                     </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-4"></div>
+            </div>
+            <div id="associates-row" class="row">
+                <div class="col-md-4">
+                    <h2>Common Associations</h2>
+                    <div id="common-associations-container">
+                        <!--(None)-->
+                    </div>
                 </div>
+                <div class="col-md-8"></div>
             </div>
             <div id="results-row" class="row">
                 <div class="col-md-4"></div>
-                <div id="results-container" class="col-md-4"></div>
+                <div id="results-container" class="container col-md-4"></div>
                 <div class="col-md-4"></div>
             </div>
             <footer class="container">
@@ -52,10 +74,23 @@
                 <p>Robert Juall | David Rosenblum</p>
             </footer>
         </main>
+        <div class="cc-modal-dark-bg"></div>
+        <div class="cc-modal">
+            <div class="cc-modal-content">
+                <div class="cc-close-container">
+                    <button id="close-modal" class="cc-close-x" title="Close modal">&times;</button>
+                </div>
+                <div class="cc-modal-header"></div>
+                <div class="cc-modal-body"></div>
+                <div class="cc-modal-footer">
+                    <button id="modal-btn" class="btn">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
     <!-- avoid render-blocking scripts -->
-    <!--<script src="js/jquery.min.js"></script>-->
-    <!--<script src="js/bootstrap.min.js"></script>-->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
     <script src="js/cc_api.js"></script>
     <script src="js/main.js"></script>
 </body>

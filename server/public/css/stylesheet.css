@@ -1,10 +1,32 @@
 body{
-    /*background: linear-gradient(180deg, #999999, #000000) fixed 100% 100%;*/
-    /*background-image: url('http://blog.hostbaby.com/wp-content/uploads/2013/07/scuffedstatic_blue1400x900.jpg');
-    background-attachment: fixed;
+    /*background: linear-gradient(180deg, #f0f5f5,   #9f9693) fixed 100% 100%;*/
+    background-repeat: no-repeat;
+    background-image: url("../images/crusader.png");
     background-position: center;
-    background-size: cover;
-    overflow: hidden;*/
+    background-size: fill;
+    background-attachment: fixed;
+}
+
+#wrapper{
+    margin: auto;
+}
+
+#results-container{
+    display: none;
+    background-color: white;
+    margin-top: 50px;
+    padding: 10px;
+    max-width: 400px;
+    border-radius: 3px;
+    border: 1px solid black;
+    text-align: center;
+    box-shadow: 2px 2px black;
+    margin-bottom: 10px;
+}
+
+header{
+    margin-top: 65px;
+    margin-bottom: 50px;
 }
 
 .btn-slide{
@@ -48,30 +70,88 @@ body{
     width: 75px;
 }
 
-#results-container{
-    display: none;
-    background-color: white;
-    margin-top: 50px;
-    padding: 10px;
-    max-width: 400px;
-    border-radius: 3px;
-    border: 1px solid black;
+.cc-modal{
+    visibility: hidden;
     text-align: center;
-    box-shadow: 2px 2px black;
-    margin-bottom: 10px;
+    position: absolute;
+    left: 0px;
+    top: 10px;
+    width: 100%;
+    z-index: 99999 !important;
+    padding: 5px;
 }
 
-.ingredient-link{
-    margin-right: 8px;
-    margin-left: 8px;
-}
-
-.centered{
-    text-align: center;
-}
-
-#wrapper{
-    background-color: white;
-    /*width: 75%;*/
+.cc-modal-content{
+    background: linear-gradient(180deg, #DDDDDD, #AAAAAA);
+    width: 500px;
     margin: auto;
+    padding: 5px;
+    border: 1.5px solid black;
+    border-radius: 4px;
+    box-shadow: 1px 1px 1px 1px black;
+}
+
+.cc-close-container{
+    text-align: right;
+    width: 100%;
+}
+
+.cc-close-x{
+    background: none;
+    border: none;
+    font-size: 1.5em;
+}
+
+.cc-modal-dark-bg{
+    visibility: hidden;
+    background-color: black;
+    opacity: 0.6;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0px;
+    top: 0px;
+}
+
+.cc-btn-info{
+    color: black;
+    border: 1px solid black;
+    border-radius: 4px;
+    background: linear-gradient(180deg, white, gray);
+    margin: 3px;
+}
+
+.cc-btn-add{
+    color: black;
+    border: 1px solid black;
+    border-radius: 4px;
+    background: linear-gradient(180deg, gold, orange);
+    margin: 3px;
+}
+
+.cc-btn-remove{
+    color: black;
+    border: 1px solid black;
+    border-radius: 4px;
+    background: linear-gradient(180deg, red, crimson);
+    margin: 3px;
+}
+
+.cc-btn-info:hover, .cc-btn-add:hover, .cc-btn-remove:hover{
+    background: white;
+}
+
+::selection{
+    background-color: black;
+    color: white;
+}
+
+::-webkit-selection{
+    background-color: black;
+    color: white;
+}
+
+::-moz-selection{
+    background-color: black;
+    color: white;
 }

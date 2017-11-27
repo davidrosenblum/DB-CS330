@@ -16,15 +16,6 @@ let QueryManager = class QueryManager{
 
     // cuisine name search
     queryCuisines(search, callback){
-        search = (search instanceof Array) ? search[0] : search;
-
-        /* search = (search instanceof Array) ? search : [search];
-        let where = "WHERE";
-        for(let name of search){
-            where += " name LIKE '%" + name + "%' AND"
-        }
-        where = where.substring(0, where.length - 3) + " ";*/
-
         this.query(
             "SELECT name FROM cuisines " +
             "WHERE name LIKE '%" + search + "%' " +
@@ -44,26 +35,6 @@ let QueryManager = class QueryManager{
 
     // list of cuisine-cuisine associations
     queryCuisineAssociations(search, callback){
-        /*search = (search instanceof Array) ? search : [search];
-
-        let where = "WHERE ";
-        for(let name of search){
-            where += "(ca.cuisine_id = (SELECT id FROM cuisines WHERE name = '" + name + "') OR " +
-            "ca.association_id = (SELECT id FROM cuisines WHERE name = '" + name + "')) AND "
-        }
-
-        let sql =
-            "SELECT c.name FROM cuisines c " +
-            "JOIN cuisine_associations ca " +
-            "ON c.id = ca.association_id " +
-            where.substring(0, where.length - 4) +
-            "ORDER BY c.name ASC";
-
-        this.query(
-            sql,
-            callback
-        );*/
-
         this.query(
             "SELECT c.name FROM cuisines c " +
             "JOIN cuisine_associations ca " +
@@ -166,6 +137,7 @@ let QueryManager = class QueryManager{
             ")"
         );
 
+        // create techniques associations table
         this.query(
             "CREATE TABLE IF NOT EXISTS technique_associations(" +
                 "cuisine_id INT(8) NOT NULL, " +
@@ -182,6 +154,7 @@ let QueryManager = class QueryManager{
             ")"
         );
 
+        // create taste associations table
         this.query(
             "CREATE TABLE IF NOT EXISTS taste_associations(" +
                 "cuisine_id INT(8) NOT NULL, " +
@@ -198,6 +171,7 @@ let QueryManager = class QueryManager{
             ")"
         );
 
+        // create cuisines association table
         this.query(
             "CREATE TABLE IF NOT EXISTS cuisine_associations(" +
                 "cuisine_id INT(8) NOT NULL, " +
@@ -217,8 +191,19 @@ let QueryManager = class QueryManager{
                 "PRIMARY KEY (cuisine_id, association_id)" +
             ")"
         );
+
+        // create accounts table
+        this.query(
+            "CREATE TABLE IF NOT EXISTS accounts(" +
+                "account_id INT(8) NOT NULL, " +
+                "username VARCHAR(25) UNIQUE NOT NULL, " +
+                "password VARCHAR(25) NOT NULL, " +
+                "PRIMARY KEY (account_id)" +
+            ")"
+        );
     }
 
+    // getter for database connection state
     get state(){
         return this.conn.state;
     }
