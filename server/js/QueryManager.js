@@ -198,7 +198,22 @@ let QueryManager = class QueryManager{
                 "account_id INT(8) NOT NULL, " +
                 "username VARCHAR(25) UNIQUE NOT NULL, " +
                 "password VARCHAR(25) NOT NULL, " +
+                "first_name VARCHAR(25) NOT NULL, " +
+                "last_name VARCHAR(25) NOT NULL, " +
+                "pro_chef BOOL NOT NULL, " +
                 "PRIMARY KEY (account_id)" +
+            ")"
+        );
+
+        // save Associations
+        this.query(
+            "CREATE TABLE IF NOT EXISTS saved_associations(" +
+                "account_id INT(8) NOT NULL, " +
+                "group_id INT(8) NOT NULL, " +
+                "cuisine_id INT(8) NOT NULL, " +
+                "PRIMARY KEY (account_id, group_id), " +
+                "FOREIGN KEY account_id REFERENCES accounts(account_id) ON DELETE CASCADE, " +
+                "FOREIGN KEY cuisine_id REFERENCES cuisines(cuisine_id) ON DELETE CASCADE " +
             ")"
         );
     }

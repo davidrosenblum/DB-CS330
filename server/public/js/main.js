@@ -1,15 +1,4 @@
 var client = (function(){
-    Set.prototype.intersection = function(set){
-        var intersection = new Set();
-
-        for(var k of set){
-            if(this.has(k)){
-                intersection.add(k);
-            }
-        }
-        return intersection;
-    };
-
     var resultsContainer, modal, modalBody, modalDarkness;
 
     // bakset object ("my list")
@@ -157,7 +146,7 @@ var client = (function(){
             basket.remove(name);
         });
 
-        this.figure.appendChild(document.createElement("br"));
+        //this.figure.appendChild(document.createElement("br"));
         this.figure.appendChild(this.infoBtn);
 
         (name in basket.cuisines) ? this.showRemove() : this.showAdd();
@@ -302,7 +291,7 @@ var client = (function(){
         var figure = document.createElement("figure");
         figure.classList.add("item-block");
         figure.setAttribute("data-name", name);
-        figure.innerHTML = name;
+        figure.innerHTML = "<span class='item-block-name'>" + name + "</span>";
         return figure;
     };
 

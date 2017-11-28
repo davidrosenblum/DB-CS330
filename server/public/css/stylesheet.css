@@ -1,10 +1,11 @@
 body{
     /*background: linear-gradient(180deg, #f0f5f5,   #9f9693) fixed 100% 100%;*/
     background-repeat: no-repeat;
-    background-image: url("../images/crusader.png");
-    background-position: center;
+    background-image: url("/images/crusader.png");
+    background-position: left;
     background-size: fill;
     background-attachment: fixed;
+    color: black;
 }
 
 #wrapper{
@@ -64,6 +65,18 @@ header{
     margin-right: 10%;
     margin-top: 10px;
     margin-bottom: 10px;
+}
+
+.item-block-name{
+    color: white;
+    display: inline-block;
+    width: 90px;
+    text-shadow:
+   -1px -1px 1px #000,
+    1px -1px 1px #000,
+   -1px  1px 1px #000,
+    1px  1px 1px #000;
+    font-size: 1.1em;
 }
 
 .item-block button{
