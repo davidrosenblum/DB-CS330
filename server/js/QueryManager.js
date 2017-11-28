@@ -212,8 +212,10 @@ let QueryManager = class QueryManager{
                 "group_id INT(8) NOT NULL, " +
                 "cuisine_id INT(8) NOT NULL, " +
                 "PRIMARY KEY (account_id, group_id), " +
-                "FOREIGN KEY account_id REFERENCES accounts(account_id) ON DELETE CASCADE, " +
-                "FOREIGN KEY cuisine_id REFERENCES cuisines(cuisine_id) ON DELETE CASCADE " +
+                "FOREIGN KEY (account_id) REFERENCES accounts(account_id) " +
+                    "ON DELETE CASCADE, " +
+                "FOREIGN KEY (cuisine_id) REFERENCES cuisines(id) " +
+                    "ON DELETE CASCADE " +
             ")"
         );
     }
