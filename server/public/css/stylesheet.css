@@ -1,9 +1,9 @@
 body{
     /*background: linear-gradient(180deg, #f0f5f5,   #9f9693) fixed 100% 100%;*/
     background-repeat: no-repeat;
-    background-image: url("/images/crusader.png");
+    background-image: url("/images/crusader.jpg");
     background-position: left;
-    background-size: fill;
+    background-size: cover;
     background-attachment: fixed;
     color: black;
 }
@@ -26,7 +26,7 @@ body{
 }
 
 header{
-    margin-top: 65px;
+    margin-top: 70px;
     margin-bottom: 50px;
 }
 
@@ -96,7 +96,7 @@ header{
 
 .cc-modal-content{
     background: linear-gradient(180deg, #DDDDDD, #AAAAAA);
-    width: 500px;
+    max-width: 480px;
     margin: auto;
     padding: 5px;
     border: 1.5px solid black;
@@ -167,4 +167,8 @@ header{
 ::-moz-selection{
     background-color: black;
     color: white;
+}
+
+#banner{
+    width: 80%;
 }
