@@ -28,7 +28,8 @@ var CCAPI = (function(){
         xhr.onreadystatechange = function(){
             if(xhr.readyState === 4){
                 if(typeof callback === "function"){
-                    callback(xhr.response, xhr.status);
+                    callback(xhr.response, xhr.status, parseResponseHeaders(xhr));
+                    window.jax = xhr;
                 }
             }
         };
@@ -37,7 +38,24 @@ var CCAPI = (function(){
         for(var h in headers){
             xhr.setRequestHeader(h, headers[h]);
         }
-        xhr.send(data);
+
+        if(data){
+            xhr.send(JSON.stringify(data));
+        }
+        else xhr.send();
+    };
+
+    // xhr response headers from string to an object {header: value}
+    var parseResponseHeaders = function(xhr){
+        var headers = {};
+
+        var sets = xhr.getAllResponseHeaders().split("\n");
+        for(var i = 0; i < sets.length; i++){
+            var split = sets[i].replace(": ", ":").split(":");
+            headers[split[0]] = split[1];
+        }
+
+        return headers;
     };
 
     // forces lower case and replaces spaces with underscores
@@ -121,6 +139,51 @@ var CCAPI = (function(){
         });
     };
 
+    var createAccount = function(email, password, firstName, lastName, proChef, callback){
+        ajax({
+            url: SERVER_HOST + "accounts/create",
+            method: "POST",
+            headers: {"cuisine-crusader": "rjdr"},
+            data: {
+                "email": email,
+                "password": password,
+                "first_name": firstName,
+                "last_name": lastName,
+                "pro_chef": (typeof proChef === "boolean") ? proChef : false
+            },
+            callback: callback
+        });
+    };
+
+    var loginAccount = function(email, password, callback){
+        ajax({
+            url: SERVER_HOST + "accounts/login",
+            method: "POST",
+            headers: {"cuisine-crusader": "rjdr"},
+            data: {
+                "email": email,
+                "password": password
+            },
+            callback: callback
+        });
+    };
+
+    var requestProfile = function(sessionGUID, callback){
+        ajax({
+            url: SERVER_HOST + "accounts/profile",
+            method: "GET",
+            headers: {
+                "cuisine-crusader": "rjdr",
+                "session-guid": sessionGUID
+            },
+            callback: callback
+        });
+    };
+
+    var saveGroup = function(username, password, associations, callback){
+
+    };
+
     // change the host
     var setHost = function(host){
         SERVER_HOST = host;
@@ -135,6 +198,9 @@ var CCAPI = (function(){
         requestTasteAssociations:       requestTasteAssociations,
         requestTechniques:              requestTechniques,
         requestTechniqueAssociations:   requestTechniqueAssociations,
+        createAccount:                  createAccount,
+        loginAccount:                   loginAccount,
+        requestProfile:                 requestProfile,
         formatData:                     formatData,
         setHost:                        setHost
     };

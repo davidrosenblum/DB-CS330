@@ -12,7 +12,8 @@ let Settings = require("./js/Settings.js"),
 // fields
 let settings =      null,   // settings object
     database =      null,   // database connection object
-    queryManager =  null;   // object that queries the database
+    queryManager =  null,   // object that queries the database
+    guids =         {};   // dictionary of guids=account
 
 // create the http server
 let app = express();
@@ -32,51 +33,224 @@ app.route("/database").get((req, res) => {
 });
 
 app.route("/cuisines/info*").get((req, res) => {
+    // extract search
     let search = extractSearchValue(req.url);
 
+    // query and respond
     queryManager.queryCuisineInfo(search, (err, rows) => sendQueryResults(res, err, rows, search));
 });
 
 app.route("/cuisines/search*").get((req, res) => {
+    // extract search
     let search = extractSearchValue(req.url);
 
+    // query and respond
     queryManager.queryCuisines(search, (err, rows) => sendQueryResults(res, err, rows, search));
 });
 
 app.route("/cuisines/associations*").get((req, res) => {
+    // extract search
     let search = extractSearchValue(req.url);
 
+    // query and respond
     queryManager.queryCuisineAssociations(search, (err, rows) => sendQueryResults(res, err, rows, search));
 });
 
 app.route("/tastes/search*").get((req, res) => {
+    // extract search
     let search = extractSearchValue(req.url);
 
+    // query and respond
     queryManager.queryTastes(search, (err, rows) => sendQueryResults(res, err, rows, search));
 });
 
 app.route("/tastes/associations*").get((req, res) => {
+    // extract search
     let search = extractSearchValue(req.url);
 
+    // query and respond
     queryManager.queryTasteAssociations(search, (err, rows) => sendQueryResults(res, err, rows, search));
 });
 
 app.route("/techniques/search*").get((req, res) => {
+    // extract search
     let search = extractSearchValue(req.url);
 
+    // query and respond
     queryManager.queryTechniques(search, (err, rows) => sendQueryResults(res, err, rows, search));
 });
 
+
 app.route("/techniques/associations*").get((req, res) => {
+    // extract search
     let search = extractSearchValue(req.url);
 
+    // query and respond
     queryManager.queryTechniqueAssociations(search, (err, rows) => sendQueryResults(res, err, rows, search));
 });
 
+
+// handle account create post requests
+app.route("/accounts/create*").post((req, res) => {
+    // enforce requried header
+    if(req.headers["cuisine-crusader"] !== "rjdr"){
+        res.writeHead(400);
+        res.end("You shall not pass.");
+        return;
+    }
+
+    handleAccountRequest(req, res);
+});
+
+// handle login post requests
+app.route("/accounts/login*").post((req, res) => {
+    // enforce requried header
+    if(req.headers["cuisine-crusader"] !== "rjdr"){
+        res.writeHead(400);
+        res.end("You shall not pass.");
+        return;
+    }
+
+    handleLoginRequest(req, res);
+});
+
+// send the 404 page to non-existent urls
 app.route("*").get((req, res) => {
     res.sendFile(__dirname + "/public/404.html");
 });
 
+// http options
+app.route("*").options((req, res) => {
+    res.writeHead(200, {
+        "Access-Control-Allow-Headers": "cuisine-crusader"
+    });
+    res.end();
+});
+
+// generates a unique session guid
+let generateSessionGUID = () => {
+    // extract current date string
+    let guid = Date.now().toString();
+    guid = "CC" + guid.substring(guid.length-6, guid.length)
+
+    // append 5 random numbers (1-9)
+    for(let i = 0; i < 5; i++){
+        guid +=  parseInt(Math.random() * 8 + 1);
+    }
+
+    // enforce uniquness
+    return (guid in guids) ? generateSessionGUID() : guid;
+};
+
+// creates an account from an http request
+let handleAccountRequest = (req, res) => {
+    // read the post body
+    extractPostJSON(req, (err, data) => {
+        // if the post body was successfully parsed... validate all fields are present
+        if(!err){
+            if(typeof data.email !== "string")              err = new Error("Email not specified.");
+            else if(typeof data.password !== "string")      err = new Error("Password not specified.");
+            else if(typeof data.first_name !== "string")    err = new Error("First name not specified.");
+            else if(typeof data.last_name !== "string")     err = new Error("Last name not specified.");
+        }
+
+        // json parse error or 'not specified' error
+        if(err){
+            res.writeHead(400);
+            res.end(err.message);
+            return;
+        }
+
+        // email must be an email
+        if(data.email.indexOf(".") === -1 || data.email.indexOf("@") === -1){
+            res.writeHead(400);
+            res.end("Please enter a valid email.");
+            return;
+        }
+
+        // default values
+        data.pro_chef = (typeof data.pro_chef === "boolean") ? data.pro_chef : false;
+
+        // create the account in the database
+        queryManager.createAccount(data.email, data.password, data.first_name, data.last_name, data.pro_chef, err => {
+            if(err){
+                // database error
+                res.writeHead(400);
+                res.end("Account \"" + data.email + "\" already registered.");
+            }
+            else{
+                // success
+                res.writeHead(200);
+                res.end("Account \"" + data.email + "\" created.");
+            }
+        });
+    });
+};
+
+// validates an account from an http request, stamps it with a session guid on success
+let handleLoginRequest = (req, res) => {
+    extractPostJSON(req, (err, data) => {
+        // if the post body was successfully parsed... validate all fields are present
+        if(!err){
+            if(typeof data.email !== "string")              err = new Error("Email not specified.");
+            else if(typeof data.password !== "string")      err = new Error("Password not specified.");
+        }
+
+        // json parse error or 'not specified' error
+        if(err){
+            res.writeHead(400);
+            res.end(err.message);
+            return;
+        }
+
+        queryManager.retrieveAccountData(data.email, data.password, (err, rows) => {
+            if(err || rows.length < 1){
+                res.writeHead(400);
+                res.end("Username and password match not found.");
+            }
+            else{
+                // rows array will only have 1 value (email is unique)
+                let account = rows[0];
+
+                // force case sensitivity (ignored by sql)
+                if(data.email !== account.email || data.password !== account.password){
+                    res.writeHead(400);
+                    res.end("Username and password match not found.");
+                    return;
+                }
+
+                // successful login
+                let guid = generateSessionGUID();
+                guids[guid] = data.email;
+
+                res.writeHead(200, {
+                    "Set-Cookie": "email=" + data.email,
+                    "Session-GUID": guid
+                });
+                res.end("Successful login!");
+            }
+        });
+    });
+};
+
+// reads the post data (body) from a post http request
+let extractPostJSON = (req, callback) => {
+    // read the data
+    req.on("data", data => {
+        try{
+            // attempt to parse the data
+            let json = JSON.parse(data);
+            callback(null, json);
+        }
+        catch(err){
+            // parse error
+            callback(err, null);
+            return;
+        }
+    });
+};
+
+// formatted response to an http request
 let sendQueryResults = (res, err, rows, search) => {
     if(!err && rows.length > 0){
         // match found
@@ -86,7 +260,7 @@ let sendQueryResults = (res, err, rows, search) => {
             result = formatNameList(rows);
         }
         else if("id" in rows[0]){
-            // its the table data
+            // its the table data [{...}]
             result = rows[0];
         }
 
