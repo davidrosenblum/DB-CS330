@@ -14,6 +14,22 @@ let QueryManager = class QueryManager{
         this.conn.query(sql, callback);
     }
 
+    createAccount(email, password, firstName, lastName, proChef, callback){
+        this.query(
+            "INSERT INTO accounts(email, password, first_name, last_name, pro_chef) " +
+            "VALUES('" + email + "','" + password + "','" + firstName + "', '" + lastName + "', " + proChef + ")",
+            callback
+        );
+    }
+
+    retrieveAccountData(email, password, callback){
+        this.query(
+            "SELECT * FROM accounts " +
+            "WHERE email = '" + email + "' AND password = '" + password + "'",
+            callback
+        );
+    }
+
     // cuisine name search
     queryCuisines(search, callback){
         this.query(
@@ -195,12 +211,12 @@ let QueryManager = class QueryManager{
         // create accounts table
         this.query(
             "CREATE TABLE IF NOT EXISTS accounts(" +
-                "account_id INT(8) NOT NULL, " +
-                "username VARCHAR(25) UNIQUE NOT NULL, " +
-                "password VARCHAR(25) NOT NULL, " +
+                "account_id INT(8) AUTO_INCREMENT NOT NULL, " +
+                "email VARCHAR(255) UNIQUE NOT NULL, " +
+                "password VARCHAR(255) NOT NULL, " +
                 "first_name VARCHAR(25) NOT NULL, " +
                 "last_name VARCHAR(25) NOT NULL, " +
-                "pro_chef BOOL NOT NULL, " +
+                "pro_chef BOOL NOT NULL DEFAULT 0, " +
                 "PRIMARY KEY (account_id)" +
             ")"
         );

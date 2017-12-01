@@ -154,6 +154,11 @@ header{
     background: white;
 }
 
+.cc-form, .cc-container{
+    width: 70%;
+    margin: auto;
+}
+
 ::selection{
     background-color: black;
     color: white;

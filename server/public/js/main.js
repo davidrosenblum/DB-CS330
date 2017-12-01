@@ -1,5 +1,9 @@
 var client = (function(){
+    // frequently accessed elements
     var resultsContainer, modal, modalBody, modalDarkness;
+
+    // sesssion ID from server
+    var sessionGUID = -1;
 
     // bakset object ("my list")
     var basket = {
@@ -114,14 +118,16 @@ var client = (function(){
             element.innerHTML = "";
 
             // for each association... create a display figure
-            for(var i = 0; i < this.associations.length; i++){
-                var df = new DisplayFigure(this.associations[i]);
-                element.appendChild(df.figure);
-            }
+            if(this.associations){
+                for(var i = 0; i < this.associations.length; i++){
+                    var df = new DisplayFigure(this.associations[i]);
+                    element.appendChild(df.figure);
+                }
 
-            // no association
-            if(element.innerHTML.length === 0){
-                //element.innerHTML = "(None)"; depricated?
+                // no association
+                if(element.innerHTML.length === 0){
+                    //element.innerHTML = "(None)"; depricated?
+                }
             }
         }
     };
@@ -373,6 +379,7 @@ var client = (function(){
         resultsContainer.style.display = "none";
         modal.style.visibility = "visible";
         modalDarkness.style.visibility = "visible";
+        modalHeader.innerHTML = "";
 
         if(typeof html === "string"){
             modalBody.innerHTML = html;
@@ -389,6 +396,8 @@ var client = (function(){
 
     // appends new information to the already opened modal
     var appendModal = function(html){
+        if(modal.style.visibility !== "visible") return;
+
         if(typeof html === "string"){
             modalBody.innerHTML += html;
         }
@@ -429,24 +438,6 @@ var client = (function(){
         window.localStorage.removeItem("cuisine-crusader");
     };
 
-    // shows the user profile
-    var showProfile = function(){
-        displayModal(
-            "<p>This feature is not yet supported.</p.",
-            "Profile"
-        )
-    };
-
-    // shows the instructions modal
-    var showHelp = function(){
-        displayModal(
-            "<p><b>Cuisine</b> searches will find a cuisine by names matching the search.</p>" +
-            "<p><b>Taste</b> searches will find cuisines that are associationed with the taste.</p>" +
-            "<p><b>Technique</b> searches will find a cuisine that are associated with the technique.</p>",
-            "Instructions"
-        );
-    };
-
     // injects the minigame
     var createMinigame = function(){
         // inject the minigame script if it does not already exist
@@ -455,6 +446,144 @@ var client = (function(){
             script.setAttribute("src", "js/minigame.js");
             document.body.appendChild(script);
         }
+    };
+
+    // creates an account by querying the html fields
+    var createAccount = function(){
+        // retrieve the html field data
+        var email = document.querySelector("#account-email-input").value,
+            password = document.querySelector("#account-password-input").value,
+            confPassword = document.querySelector("#account-confirm-password-input").value,
+            firstName = document.querySelector("#account-firstname-input").value,
+            lastName = document.querySelector("#account-lastname-input").value,
+            proChef = document.querySelector("#account-prochef-input").value;
+
+        if(password !== confPassword){
+            appendModal("Passwords don't match!");
+            return;
+        }
+
+        // send the request, display results
+        CCAPI.createAccount(email, password, firstName, lastName, proChef, function(res, status){
+            appendModal("<div data='account-response'>" + res + "</div>");
+        });
+    };
+
+    // attempts account login by submitting the form fields
+    var loginAccount = function(){
+        email = document.querySelector("#login-email-input").value,
+        password = document.querySelector("#login-password-input").value,
+
+        CCAPI.loginAccount(email, password, function(res, status, headers){
+            if(status === 200){
+                // email cookie
+                if(headers["set-cookie"]){
+                    document.cookie = headers["set-cookie"]; // email=....
+                }
+                // session guid
+                if(headers["session-guid"]){
+                    sessionGUID = headers["session-guid"];
+                }
+
+                closeModal();
+            }
+            else{
+                // error message
+                appendModal("<div data='account-response'>" + res + "</div>");
+            }
+        });
+    };
+
+    // shows the instructions modal
+    var showHelp = function(){
+        displayModal(
+            "<div class='cc-container'>" +
+                "<p><b>Cuisine</b> searches will find a cuisine by names matching the search.</p>" +
+                "<p><b>Taste</b> searches will find cuisines that are associationed with the taste.</p>" +
+                "<p><b>Technique</b> searches will find a cuisine that are associated with the technique.</p>" +
+            "</div>",
+            "Instructions"
+        );
+    };
+
+    // shows the user profile
+    var showProfileModal = function(){
+        if(sessionGUID === -1){
+            return showLoginModal();
+        }
+
+        displayModal(
+            "<p>This feature is not yet supported.</p.",
+            "Profile"
+        );
+
+        CCAPI.requestProfile(sessionGUID, function(err, res){
+            // do something....
+        });
+    };
+
+    var showLoginModal = function(){
+        displayModal(
+            "<form class='cc-form'>" +
+                "<div class='form-group'>" +
+                    "<label for='login-email-input'>Email</label>" +
+                    "<input type='email' id='login-email-input' class='form-control' required='required'>" +
+                "</div>" +
+                "<div class='form-group'>" +
+                    "<label for='login-password-input'>Password</label>" +
+                    "<input type='password' id='login-password-input' class='form-control' required='required'>" +
+                "</div>" +
+                "<div class='form-group'>" +
+                    "<button class='btn' id='submit-login'>Submit</button>" +
+                "</div>" +
+            "</form>",
+            "Account Login"
+        );
+        document.querySelector("#submit-login").addEventListener("click", function(evt){
+            evt.preventDefault();
+            loginAccount();
+        });
+    };
+
+    var showSignupModal = function(){
+        displayModal(
+            "<form class='cc-form'>" +
+                "<div class='form-group'>" +
+                    "<label for='account-firstname-input'>First Name</label>" +
+                    "<input id='account-firstname-input' class='form-control' required='required'>" +
+                "</div>" +
+                "<div class='form-group'>" +
+                    "<label for='account-lastname-input'>Last Name</label>" +
+                    "<input id='account-lastname-input' class='form-control' required='required'>" +
+                "</div>" +
+                "<div class='form-group'>" +
+                    "<label for='account-email-input'>Email</label>" +
+                    "<input type='email' id='account-email-input' class='form-control' required='required'>" +
+                "</div>" +
+                "<div class='form-group'>" +
+                    "<label for='account-password-input'>Password</label>" +
+                    "<input type='password' id='account-password-input' class='form-control' required='required'>" +
+                "</div>" +
+                "<div class='form-group'>" +
+                    "<label for='account-confirm-password-input'>Confirm Password</label>" +
+                    "<input type='password' id='account-confirm-password-input' class='form-control' required='required'>" +
+                "</div>" +
+                "<div class='form-group'>" +
+                    "<label for='account-prochef-input'>Professional Chef</label>" +
+                    "&nbsp;&nbsp;&nbsp;&nbsp;" +
+                    "<input type='checkbox' id='account-prochef-input'>" +
+                "</div>" +
+                "<div class='form-group'>" +
+                    "<button class='btn' id='submit-account'>Submit</button>" +
+                "</div>" +
+            "</form>",
+            "Account Registration"
+        );
+
+        document.querySelector("#submit-account").addEventListener("click", function(evt){
+            evt.preventDefault();
+            createAccount();
+        });
     };
 
     // parses url quest strings
@@ -496,7 +625,8 @@ var client = (function(){
         document.querySelector("#close-modal").addEventListener("click", closeModal);
 
         // nav buttons
-        document.querySelector("#profile-btn").addEventListener("click", showProfile);
+        document.querySelector("#profile-btn").addEventListener("click", showProfileModal);
+        document.querySelector("#signup-btn").addEventListener("click", showSignupModal);
         document.querySelector("#help-btn").addEventListener("click", showHelp);
 
         // load last basket
@@ -508,6 +638,20 @@ var client = (function(){
             // auto search query string
             document.querySelector("#search-input").value = qs["search"];
             document.querySelector("#search-btn").click();
+        }
+        else if("form" in qs){
+            document.querySelector("#signup-btn").click();
+            document.querySelector("#account-firstname-input").value = "anakin";
+            document.querySelector("#account-lastname-input").value = "skywalker";
+            document.querySelector("#account-email-input").value = "darth@vader.com";
+            document.querySelector("#account-password-input").value = "deathstar123";
+            document.querySelector("#account-confirm-password-input").value = "deathstar123";
+            document.querySelector("#account-prochef-input").checked = true;
+        }
+        else if("login" in qs){
+            document.querySelector("#profile-btn").click();
+            document.querySelector("#login-email-input").value = "darth@vader.com";
+            document.querySelector("#login-password-input").value = "deathstar123";
         }
 
         // minigame easter egg!
