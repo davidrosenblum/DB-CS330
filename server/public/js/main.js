@@ -440,7 +440,7 @@ var client = (function(){
     var loadLocalBasket = function(){
         var save = window.localStorage.getItem("cuisine-crusader");
 
-        var data = JSON.parse(save);
+        var data = save ? JSON.parse(save) : [];
         for(let i = 0; i < data.length; i++){
             basket.add(data[i]);
         }
@@ -478,7 +478,7 @@ var client = (function(){
 
         // send the request, display results
         CCAPI.createAccount(email, password, firstName, lastName, proChef, function(res, status){
-            appendModal("<div data='account-response'>" + res + "</div>");
+            appendModal("<p data='account-response'>" + res + "</p>");
         });
     };
 

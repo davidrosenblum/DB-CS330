@@ -97,7 +97,7 @@ app.route("/techniques/associations*").get((req, res) => {
 app.route("/accounts/create*").post((req, res) => {
     console.log("CREATE");
     // enforce requried header
-    if(isMissingHeader(req)){
+    if(isMissingHeader(req, res)){
         return;
     }
 
@@ -107,7 +107,7 @@ app.route("/accounts/create*").post((req, res) => {
 // handle login post requests
 app.route("/accounts/login*").post((req, res) => {
     // enforce requried header
-    if(isMissingHeader(req)){
+    if(isMissingHeader(req, res)){
         return;
     }
 
@@ -116,15 +116,15 @@ app.route("/accounts/login*").post((req, res) => {
 
 app.route("/accounts/profile/get*").get((req, res) => {
     // enforce requried header
-    if(isMissingHeader(req)){
+    if(isMissingHeader(req, res)){
         return;
     }
 
-    if(isMissingSessionGUID(req)){
+    if(isMissingSessionGUID(req, res)){
         return;
     }
 
-    let email = requestToEmail(req);
+    let email = requestToEmail(req, res);
     if(!email) return;
 
     queryManager.retrieveSavedAssociations(email, (err, rows) => {
@@ -143,15 +143,15 @@ app.route("/accounts/profile/get*").get((req, res) => {
 
 app.route("/accounts/profile/set*").post((req, res) => {
     // enforce requried header
-    if(isMissingHeader(req)){
+    if(isMissingHeader(req, res)){
         return;
     }
 
-    if(isMissingSessionGUID(req)){
+    if(isMissingSessionGUID(req, res)){
         return;
     }
 
-    let email = requestToEmail(req);
+    let email = requestToEmail(req, res);
     if(!email) return;
 
     extractPostJSON(req, (err, data) => {
@@ -253,7 +253,7 @@ app.route("*").get((req, res) => {
     res.sendFile(__dirname + "/public/404.html");
 });
 
-let isMissingHeader = (req) => {
+let isMissingHeader = (req, res) => {
     if(req.headers["x-cuisine-crusader"] !== "rjdr"){
         res.writeHead(400);
         res.end("You shall not pass.");
@@ -262,7 +262,7 @@ let isMissingHeader = (req) => {
     return false;
 };
 
-let isMissingSessionGUID = (req) => {
+let isMissingSessionGUID = (req, res) => {
     if(!req.headers["x-session-guid"]){
         res.writeHead(400);
         res.end("You're not logged in.");
@@ -271,7 +271,7 @@ let isMissingSessionGUID = (req) => {
     return false;
 };
 
-let requestToEmail = (req) => {
+let requestToEmail = (req, res) => {
     let email = guids[req.headers["x-session-guid"]];
     if(!email){
         res.writeHead(400);
