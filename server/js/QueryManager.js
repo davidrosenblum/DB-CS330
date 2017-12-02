@@ -48,6 +48,41 @@ let QueryManager = class QueryManager{
             resolved = 0,
             allSent = false;
 
+        this.query(
+            "SELECT COUNT(DISTINCT group_id) + 1 AS 'group_id' FROM saved_associations " +
+            "WHERE account_id = (" +
+                "SELECT account_id FROM accounts " +
+                "WHERE email = '" + email + "'" +
+            ")",
+            (err, rows) => {
+                if(!err){
+                    for(let name of cuisines){
+                        this.query(
+                            "INSERT INTO saved_associations(account_id, group_id, cuisine_id) " +
+                            "VALUES(" +
+                                "(SELECT account_id FROM accounts WHERE email = '" + email + "'), " +
+                                rows[0].group_id + ", " +
+                                "(SELECT id FROM cuisines WHERE name = '" + name + "')" +
+                            ")",
+                            (err) => {
+                                if(err) errors.push(err);
+                                resolved++;
+
+                                if(allSent && resolved === cuisines.length){
+                                    callback(errors.length === 0 ? null : errors);
+                                }
+                            }
+                        );
+                    }
+                    allSent = true;
+                }
+                else{
+                    callback([err]);
+                }
+            }
+        );
+
+        return;
         for(let name of cuisines){
             this.query(
                 "INSERT INTO saved_associations(account_id, group_id, cuisine_id) " +
@@ -74,6 +109,17 @@ let QueryManager = class QueryManager{
             );
         }
         allSent = true;
+    }
+
+    deleteAssociationsGroup(email, groupID, callback){
+        this.query(
+            "DELETE FROM saved_associations " +
+            "WHERE group_id = " + groupID + " " +
+            "AND account_id = (" +
+                "SELECT account_id FROM accounts WHERE email = '" + email + "'" +
+            ")",
+            callback
+        );
     }
 
     // cuisine name search

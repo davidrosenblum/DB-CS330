@@ -97,9 +97,7 @@ app.route("/techniques/associations*").get((req, res) => {
 app.route("/accounts/create*").post((req, res) => {
     console.log("CREATE");
     // enforce requried header
-    if(req.headers["x-cuisine-crusader"] !== "rjdr"){
-        res.writeHead(400);
-        res.end("You shall not pass.");
+    if(isMissingHeader(req)){
         return;
     }
 
@@ -109,9 +107,7 @@ app.route("/accounts/create*").post((req, res) => {
 // handle login post requests
 app.route("/accounts/login*").post((req, res) => {
     // enforce requried header
-    if(req.headers["x-cuisine-crusader"] !== "rjdr"){
-        res.writeHead(400);
-        res.end("You shall not pass.");
+    if(isMissingHeader(req)){
         return;
     }
 
@@ -120,25 +116,16 @@ app.route("/accounts/login*").post((req, res) => {
 
 app.route("/accounts/profile/get*").get((req, res) => {
     // enforce requried header
-    if(req.headers["x-cuisine-crusader"] !== "rjdr"){
-        res.writeHead(400);
-        res.end("You shall not pass.");
+    if(isMissingHeader(req)){
         return;
     }
 
-    if(!req.headers["x-session-guid"]){
-        res.writeHead(400);
-        res.end("You're not logged in.");
+    if(isMissingSessionGUID(req)){
         return;
     }
 
-    // get email from session ID
-    let email = guids[req.headers["x-session-guid"]];
-    if(!email){
-        res.writeHead(400);
-        res.end("Invalid session ID.");
-        return;
-    }
+    let email = requestToEmail(req);
+    if(!email) return;
 
     queryManager.retrieveSavedAssociations(email, (err, rows) => {
         if(err){
@@ -156,25 +143,16 @@ app.route("/accounts/profile/get*").get((req, res) => {
 
 app.route("/accounts/profile/set*").post((req, res) => {
     // enforce requried header
-    if(req.headers["x-cuisine-crusader"] !== "rjdr"){
-        res.writeHead(400);
-        res.end("You shall not pass.");
+    if(isMissingHeader(req)){
         return;
     }
 
-    if(!req.headers["x-session-guid"]){
-        res.writeHead(400);
-        res.end("You're not logged in.");
+    if(isMissingSessionGUID(req)){
         return;
     }
 
-    // get email from session ID
-    let email = guids[req.headers["x-session-guid"]];
-    if(!email){
-        res.writeHead(400);
-        res.end("Invalid session ID.");
-        return;
-    }
+    let email = requestToEmail(req);
+    if(!email) return;
 
     extractPostJSON(req, (err, data) => {
         queryManager.saveAssociations(email, data, errs => {
@@ -187,6 +165,39 @@ app.route("/accounts/profile/set*").post((req, res) => {
             res.writeHead(200);
             res.end("Saved with " + (errs ? errs.length : 0) + " errors.");
         });
+    });
+});
+
+app.route("/accounts/profile/delete*").post((req, res) => {
+    // enforce requried header
+    if(isMissingHeader(req)){
+        return;
+    }
+
+    if(isMissingSessionGUID(req)){
+        return;
+    }
+
+    let email = requestToEmail(req);
+    if(!email) return;
+
+    let groupID = req.headers["x-group-id"] || -1;
+    if(groupID < 0){
+        res.writeHead(400);
+        res.end("Group does not exist.");
+        return;
+    }
+
+    queryManager.deleteAssociationsGroup(email, groupID, (err) => {
+        if(err){
+            res.writeHead(500);
+            res.end("Server error.");
+            console.log(err.message);
+        }
+        else{
+            res.writeHead(200);
+            res.end("Group " + groupID + " successfully deleted.");
+        }
     });
 });
 
@@ -241,6 +252,34 @@ app.route("/killswitch/engage").get((req, res) => {
 app.route("*").get((req, res) => {
     res.sendFile(__dirname + "/public/404.html");
 });
+
+let isMissingHeader = (req) => {
+    if(req.headers["x-cuisine-crusader"] !== "rjdr"){
+        res.writeHead(400);
+        res.end("You shall not pass.");
+        return true;
+    }
+    return false;
+};
+
+let isMissingSessionGUID = (req) => {
+    if(!req.headers["x-session-guid"]){
+        res.writeHead(400);
+        res.end("You're not logged in.");
+        return true;
+    }
+    return false;
+};
+
+let requestToEmail = (req) => {
+    let email = guids[req.headers["x-session-guid"]];
+    if(!email){
+        res.writeHead(400);
+        res.end("Invalid session ID.");
+        return null;
+    }
+    return email;
+};
 
 // generates a unique session guid
 let generateSessionGUID = () => {
