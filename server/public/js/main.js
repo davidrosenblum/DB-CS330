@@ -21,6 +21,9 @@ var client = (function(){
                 this.cuisines[name] = itemFigure;
                 element.appendChild(itemFigure.figure);
 
+                document.querySelector("#basket-clear-btn").style.display = "inline";
+                if(sessionGUID !== -1) document.querySelector("#basket-export-btn").style.display = "inline";
+
                 saveLocalBasket();
 
                 commonAssociationManager.store(name);
@@ -40,6 +43,8 @@ var client = (function(){
 
                 if(element.innerHTML.length === 0){
                     element.innerHTML = "(Empty)";
+                    document.querySelector("#basket-clear-btn").style.display = "none";
+                    document.querySelector("#basket-export-btn").style.display = "none";
                 }
 
                 saveLocalBasket();
@@ -467,7 +472,7 @@ var client = (function(){
             proChef = document.querySelector("#account-prochef-input").value;
 
         if(password !== confPassword){
-            appendModal("Passwords don't match!");
+            appendModal("<p>Passwords don't match!</p>");
             return;
         }
 
@@ -542,7 +547,7 @@ var client = (function(){
             setModal(""); // clear loading text
         }
         catch(err){
-            setModal("Error loading profile.");
+            setModal("<p>Error loading profile.</p>");
             return;
         }
 
@@ -563,11 +568,43 @@ var client = (function(){
 
         for(var groupID in groups){
             var group = groups[groupID];
-            appendModal("<h3>Group " + groupID + "</h3>");
+
+            var container = document.createElement("div");
+            container.setAttribute("data-group", groupID);
+
+            container.innerHTML += "<h3>Group " + groupID + "</h3>";
+            container.innerHTML += "<button data-group='" + groupID + "'>Import</button>";
+            container.innerHTML += "<button data-group='" + groupID + "'>Delete</button>";
+
             for(var i = 0; i < group.length; i++){
-                appendModal(group[i].figure);
+                container.appendChild(group[i].figure)
             }
+
+            appendModal(container);
         }
+
+        var setListener = function(btn){
+            btn.addEventListener("click", function(evt){
+                evt.preventDefault();
+                deleteGroup(btn.parentNode);
+            });
+        };
+
+        var btns = document.querySelectorAll("button[data-group]");
+        for(var i = 0; i < btns.length; i++){
+            setListener(btns[i]);
+        }
+    };
+
+    var deleteGroup = function(groupElement){
+        var groupID = groupElement.getAttribute("data-group");
+
+        CCAPI.deleteGroup(sessionGUID, groupID, function(res, status){
+            console.log('delete');
+            if(status === 200){
+                groupElement.style.display = "none";
+            }
+        });
     };
 
     var showLoginModal = function(){
@@ -653,10 +690,11 @@ var client = (function(){
 
         CCAPI.saveGroup(sessionGUID, group, function(res, status){
             if(status === 200){
-                displayModal(res);
+                displayModal("<p>" + res + "</p>");
+                clearBasket();
             }
             else{
-                displayModal("Error saving group.");
+                displayModal("<p>Error saving group.</p>");
             }
         });
     };

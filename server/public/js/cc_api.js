@@ -193,6 +193,19 @@ var CCAPI = (function(){
         });
     };
 
+    var deleteGroup = function(sessionGUID, groupID, callback){
+        ajax({
+            url: SERVER_HOST + "accounts/profile/delete",
+            method: "POST",
+            headers: {
+                "x-cuisine-crusader": "rjdr",
+                "x-session-guid": sessionGUID,
+                "x-group-id": groupID
+            },
+            callback: callback
+        });
+    };
+
     // change the host
     var setHost = function(host){
         SERVER_HOST = host;
@@ -211,6 +224,7 @@ var CCAPI = (function(){
         loginAccount:                   loginAccount,
         requestProfile:                 requestProfile,
         saveGroup:                      saveGroup,
+        deleteGroup:                    deleteGroup,
         formatData:                     formatData,
         setHost:                        setHost
     };

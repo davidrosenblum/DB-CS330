@@ -154,6 +154,10 @@ header{
     background: white;
 }
 
+#basket-clear-btn, #basket-export-btn{
+    display: none;
+}
+
 .cc-form, .cc-container{
     width: 70%;
     margin: auto;
