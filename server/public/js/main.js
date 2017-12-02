@@ -406,6 +406,14 @@ var client = (function(){
         }
     };
 
+    // overrides the modal body
+    var setModal = function(html){
+        if(modal.style.visibility !== "visible") return;
+
+        modalBody.innerHTML = "";
+        appendModal(html);
+    };
+
     // closes (hides) the popup modal and clears its contents
     var closeModal = function(){
         modalBody.innerHTML = "";
@@ -481,11 +489,10 @@ var client = (function(){
                     document.cookie = headers["set-cookie"]; // email=....
                 }
                 // session guid
-                if(headers["session-guid"]){
-                    sessionGUID = headers["session-guid"];
+                if(headers["x-session-guid"]){
+                    sessionGUID = headers["x-session-guid"];
+                    showProfileModal(); // this time it will show the profile
                 }
-
-                closeModal();
             }
             else{
                 // error message
@@ -513,13 +520,54 @@ var client = (function(){
         }
 
         displayModal(
-            "<p>This feature is not yet supported.</p.",
-            "Profile"
+            "<p>Loading...</p>"
         );
 
-        CCAPI.requestProfile(sessionGUID, function(err, res){
-            // do something....
+        CCAPI.requestProfile(sessionGUID, function(res, status){
+            if(status === 200){
+                displayProfileData(res);
+            }
+            else{
+                // session error, logout
+                logout();
+                showLoginModal();
+            }
         });
+    };
+
+    var displayProfileData = function(data){
+        try{
+            data = JSON.parse(data);
+            // looks like [{group_id: 1, name: "cuisine"}]
+            setModal(""); // clear loading text
+        }
+        catch(err){
+            setModal("Error loading profile.");
+            return;
+        }
+
+        // convert [{group_id: 1, name: "cuisine"}] to {1: ["cuisine"]}
+        // sorts
+        var groups = {};
+        for(var i = 0 ; i < data.length; i++){
+            var groupID = data[i].group_id,
+                name = data[i].name;
+
+            if(groupID.toString() in groups === false){
+                groups[groupID] = [];
+            }
+
+            var group = groups[groupID];
+            group.push(new DisplayFigure(name));
+        }
+
+        for(var groupID in groups){
+            var group = groups[groupID];
+            appendModal("<h3>Group " + groupID + "</h3>");
+            for(var i = 0; i < group.length; i++){
+                appendModal(group[i].figure);
+            }
+        }
     };
 
     var showLoginModal = function(){
@@ -586,6 +634,37 @@ var client = (function(){
         });
     };
 
+    var clearBasket = function(){
+        for(var name in basket.cuisines){
+            basket.remove(name);
+        }
+    };
+
+    var exportBasket = function(){
+        var group = [];
+        for(var name in basket.cuisines){
+            group.push(name);
+        }
+
+        if(group.length < 1){
+            // no point in saving nothing!
+            return;
+        }
+
+        CCAPI.saveGroup(sessionGUID, group, function(res, status){
+            if(status === 200){
+                displayModal(res);
+            }
+            else{
+                displayModal("Error saving group.");
+            }
+        });
+    };
+
+    var logout = function(){
+        sessionGUID = -1;
+    };
+
     // parses url quest strings
     var parseQueryStrings = function(){
         var queryStrings = {};
@@ -628,6 +707,10 @@ var client = (function(){
         document.querySelector("#profile-btn").addEventListener("click", showProfileModal);
         document.querySelector("#signup-btn").addEventListener("click", showSignupModal);
         document.querySelector("#help-btn").addEventListener("click", showHelp);
+
+        // basket buttons
+        document.querySelector("#basket-clear-btn").addEventListener("click", clearBasket);
+        document.querySelector("#basket-export-btn").addEventListener("click", exportBasket);
 
         // load last basket
         loadLocalBasket();

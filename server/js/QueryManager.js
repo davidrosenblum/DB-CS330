@@ -30,6 +30,52 @@ let QueryManager = class QueryManager{
         );
     }
 
+    retrieveSavedAssociations(email, callback){
+        this.query(
+            "SELECT name, group_id FROM saved_associations s " +
+            "JOIN cuisines c " +
+            "ON s.cuisine_id = c.id " +
+            "WHERE s.account_id = (" +
+                "SELECT account_id FROM accounts WHERE email = '" + email + "'" +
+            ")" +
+            "ORDER BY s.group_id ASC",
+            callback
+        );
+    }
+
+    saveAssociations(email, cuisines, callback){
+        let errors = [],
+            resolved = 0,
+            allSent = false;
+
+        for(let name of cuisines){
+            this.query(
+                "INSERT INTO saved_associations(account_id, group_id, cuisine_id) " +
+                "VALUES(" +
+                    "(SELECT account_id FROM accounts WHERE email = '" + email + "'), " +
+                    "(" +
+                        "SELECT COUNT(DISTINCT group_id) + 1 " +
+                        "FROM (SELECT * FROM saved_associations) sa " +
+                        "WHERE account_id = (" +
+                            "SELECT account_id FROM accounts " +
+                            "WHERE email = '" + email + "'" +
+                        ")" +
+                    "), " +
+                    "(SELECT id FROM cuisines WHERE name = '" + name + "')" +
+                ")",
+                (err) => {
+                    if(err) errors.push(err);
+                    resolved++;
+
+                    if(allSent && resolved === cuisines.length){
+                        callback(errors.length === 0 ? null : errors);
+                    }
+                }
+            );
+        }
+        allSent = true;
+    }
+
     // cuisine name search
     queryCuisines(search, callback){
         this.query(
@@ -227,7 +273,7 @@ let QueryManager = class QueryManager{
                 "account_id INT(8) NOT NULL, " +
                 "group_id INT(8) NOT NULL, " +
                 "cuisine_id INT(8) NOT NULL, " +
-                "PRIMARY KEY (account_id, group_id), " +
+                "PRIMARY KEY (account_id, group_id, cuisine_id), " +
                 "FOREIGN KEY (account_id) REFERENCES accounts(account_id) " +
                     "ON DELETE CASCADE, " +
                 "FOREIGN KEY (cuisine_id) REFERENCES cuisines(id) " +

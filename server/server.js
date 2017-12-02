@@ -9,6 +9,9 @@ let fs = require("fs"),                             // file system
 let Settings = require("./js/Settings.js"),
     QueryManager = require("./js/QueryManager.js");
 
+// constants
+const SESSION_DURATION = 1000 * 60 * 12;
+
 // fields
 let settings =      null,   // settings object
     database =      null,   // database connection object
@@ -92,8 +95,9 @@ app.route("/techniques/associations*").get((req, res) => {
 
 // handle account create post requests
 app.route("/accounts/create*").post((req, res) => {
+    console.log("CREATE");
     // enforce requried header
-    if(req.headers["cuisine-crusader"] !== "rjdr"){
+    if(req.headers["x-cuisine-crusader"] !== "rjdr"){
         res.writeHead(400);
         res.end("You shall not pass.");
         return;
@@ -105,7 +109,7 @@ app.route("/accounts/create*").post((req, res) => {
 // handle login post requests
 app.route("/accounts/login*").post((req, res) => {
     // enforce requried header
-    if(req.headers["cuisine-crusader"] !== "rjdr"){
+    if(req.headers["x-cuisine-crusader"] !== "rjdr"){
         res.writeHead(400);
         res.end("You shall not pass.");
         return;
@@ -114,17 +118,128 @@ app.route("/accounts/login*").post((req, res) => {
     handleLoginRequest(req, res);
 });
 
-// send the 404 page to non-existent urls
-app.route("*").get((req, res) => {
-    res.sendFile(__dirname + "/public/404.html");
+app.route("/accounts/profile/get*").get((req, res) => {
+    // enforce requried header
+    if(req.headers["x-cuisine-crusader"] !== "rjdr"){
+        res.writeHead(400);
+        res.end("You shall not pass.");
+        return;
+    }
+
+    if(!req.headers["x-session-guid"]){
+        res.writeHead(400);
+        res.end("You're not logged in.");
+        return;
+    }
+
+    // get email from session ID
+    let email = guids[req.headers["x-session-guid"]];
+    if(!email){
+        res.writeHead(400);
+        res.end("Invalid session ID.");
+        return;
+    }
+
+    queryManager.retrieveSavedAssociations(email, (err, rows) => {
+        if(err){
+            // should never happen!
+            console.log(err.message);
+            res.writeHead(500);
+            res.end("Server error.");
+        }
+        else{
+            res.writeHead(200);
+            res.end(JSON.stringify(rows, null, 2));
+        }
+    });
+});
+
+app.route("/accounts/profile/set*").post((req, res) => {
+    // enforce requried header
+    if(req.headers["x-cuisine-crusader"] !== "rjdr"){
+        res.writeHead(400);
+        res.end("You shall not pass.");
+        return;
+    }
+
+    if(!req.headers["x-session-guid"]){
+        res.writeHead(400);
+        res.end("You're not logged in.");
+        return;
+    }
+
+    // get email from session ID
+    let email = guids[req.headers["x-session-guid"]];
+    if(!email){
+        res.writeHead(400);
+        res.end("Invalid session ID.");
+        return;
+    }
+
+    extractPostJSON(req, (err, data) => {
+        queryManager.saveAssociations(email, data, errs => {
+            if(errs){
+                for(let err of errs){
+                    console.log(err.message);
+                }
+            }
+
+            res.writeHead(200);
+            res.end("Saved with " + (errs ? errs.length : 0) + " errors.");
+        });
+    });
 });
 
 // http options
 app.route("*").options((req, res) => {
     res.writeHead(200, {
-        "Access-Control-Allow-Headers": "cuisine-crusader"
+        "Access-Control-Allow-Headers": "x-cuisine-crusader"
     });
     res.end();
+});
+
+app.route("/sesssions/clear").get((req, res) => {
+    if(req.headers["x-cc-dev"] === "darksouls3"){
+        guids = {};
+        res.writeHead(200);
+        res.end("Session IDs cleared.");
+    }
+    else{
+        res.writeHead(403);
+        res.end("I find your lack of access disturbing.");
+    }
+});
+
+// secret backdoor for session guids!
+app.route("/sessions/guids").get((req, res) => {
+    if(req.headers["x-cc-dev"] === "darksouls3"){
+        res.writeHead(200);
+        res.end(JSON.stringify(guids, null, 2));
+    }
+    else{
+        res.writeHead(403);
+        res.end("I find your lack of access disturbing.");
+    }
+});
+
+// secret backdoor for server termination!
+app.route("/killswitch/engage").get((req, res) => {
+    if(req.headers["x-cc-dev"] === "darksouls3"){
+        res.writeHead(200);
+        res.end("Server shutdown.");
+
+        console.log("Server shutdown.");
+        process.exit();
+    }
+    else{
+        res.writeHead(403);
+        res.end("I find your lack of access disturbing.");
+    }
+});
+
+// send the 404 page to non-existent urls
+app.route("*").get((req, res) => {
+    res.sendFile(__dirname + "/public/404.html");
 });
 
 // generates a unique session guid
@@ -222,10 +337,11 @@ let handleLoginRequest = (req, res) => {
                 // successful login
                 let guid = generateSessionGUID();
                 guids[guid] = data.email;
+                setTimeout(() => delete guids[guid], SESSION_DURATION);
 
                 res.writeHead(200, {
-                    "Set-Cookie": "email=" + data.email,
-                    "Session-GUID": guid
+                    "set-cookie": "email=" + data.email,
+                    "x-session-guid": guid
                 });
                 res.end("Successful login!");
             }
