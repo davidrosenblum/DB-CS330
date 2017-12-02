@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css?family=Electrolize');
+
 body{
     /*background: linear-gradient(180deg, #f0f5f5,   #9f9693) fixed 100% 100%;*/
     background-repeat: no-repeat;
@@ -6,6 +8,13 @@ body{
     background-size: cover;
     background-attachment: fixed;
     color: black;
+    font-family: electrolize, arial;
+}
+
+@media only screen and (max-width: 480px){
+    body{
+        background-size: auto;
+    }
 }
 
 #wrapper{
@@ -158,6 +167,10 @@ header{
     display: none;
 }
 
+#banner{
+    width: 80%;
+}
+
 .cc-form, .cc-container{
     width: 70%;
     margin: auto;
@@ -176,8 +189,4 @@ header{
 ::-moz-selection{
     background-color: black;
     color: white;
-}
-
-#banner{
-    width: 80%;
 }

@@ -302,23 +302,21 @@ let handleAccountRequest = (req, res) => {
     extractPostJSON(req, (err, data) => {
         // if the post body was successfully parsed... validate all fields are present
         if(!err){
+            // no error reading post - validate form fields
             if(typeof data.email !== "string")              err = new Error("Email not specified.");
             else if(typeof data.password !== "string")      err = new Error("Password not specified.");
             else if(typeof data.first_name !== "string")    err = new Error("First name not specified.");
             else if(typeof data.last_name !== "string")     err = new Error("Last name not specified.");
+
+            else if(data.email.indexOf(".") === -1 || data.email.indexOf("@") === -1){
+                err = new Error("Please enter a valid email.");
+            }
         }
 
-        // json parse error or 'not specified' error
+        // json parse error, 'not specified', 'please enter valid...' error
         if(err){
             res.writeHead(400);
             res.end(err.message);
-            return;
-        }
-
-        // email must be an email
-        if(data.email.indexOf(".") === -1 || data.email.indexOf("@") === -1){
-            res.writeHead(400);
-            res.end("Please enter a valid email.");
             return;
         }
 
