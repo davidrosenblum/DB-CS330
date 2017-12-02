@@ -485,7 +485,12 @@ var client = (function(){
     // attempts account login by submitting the form fields
     var loginAccount = function(){
         email = document.querySelector("#login-email-input").value,
-        password = document.querySelector("#login-password-input").value,
+        password = document.querySelector("#login-password-input").value;
+
+        if(!email || !password){
+            appendModal("<p>Please enter all fields.<p>");
+            return;
+        }
 
         CCAPI.loginAccount(email, password, function(res, status, headers){
             if(status === 200){
@@ -525,7 +530,8 @@ var client = (function(){
         }
 
         displayModal(
-            "<p>Loading...</p>"
+            "<p>Loading...</p>",
+            "Profile"
         );
 
         CCAPI.requestProfile(sessionGUID, function(res, status){
@@ -551,6 +557,12 @@ var client = (function(){
             return;
         }
 
+        // no saved groups?
+        if(data.length === 0){
+            appendModal("<p>You have no saved groups yet.</p>");
+            return;
+        }
+
         // convert [{group_id: 1, name: "cuisine"}] to {1: ["cuisine"]}
         // sorts
         var groups = {};
@@ -573,8 +585,8 @@ var client = (function(){
             container.setAttribute("data-group", groupID);
 
             container.innerHTML += "<h3>Group " + groupID + "</h3>";
-            container.innerHTML += "<button data-group='" + groupID + "'>Import</button>";
-            container.innerHTML += "<button data-group='" + groupID + "'>Delete</button>";
+            container.innerHTML += "<button data-name='import' data-group='" + groupID + "'>Import</button>";
+            container.innerHTML += "<button data-name='delete' data-group='" + groupID + "'>Delete</button>";
 
             for(var i = 0; i < group.length; i++){
                 container.appendChild(group[i].figure)
@@ -583,10 +595,11 @@ var client = (function(){
             appendModal(container);
         }
 
+        // ugly approach, but loops with functions inside cause problems!
         var setListener = function(btn){
             btn.addEventListener("click", function(evt){
                 evt.preventDefault();
-                deleteGroup(btn.parentNode);
+                (btn.getAttribute("data-name") === "delete") ? deleteGroup(btn.parentNode) : importGroup(btn.parentNode);
             });
         };
 
@@ -600,16 +613,22 @@ var client = (function(){
         var groupID = groupElement.getAttribute("data-group");
 
         CCAPI.deleteGroup(sessionGUID, groupID, function(res, status){
-            console.log('delete');
             if(status === 200){
                 groupElement.style.display = "none";
             }
         });
     };
 
+    var importGroup = function(groupElement){
+        var names = groupElement.querySelectorAll(".item-block-name");
+        for(var i = 0; i < names.length; i++){
+            basket.add(names[i].textContent);
+        }
+    };
+
     var showLoginModal = function(){
         displayModal(
-            "<form class='cc-form'>" +
+            "<form class='cc-form' action='#'>" +
                 "<div class='form-group'>" +
                     "<label for='login-email-input'>Email</label>" +
                     "<input type='email' id='login-email-input' class='form-control' required='required'>" +
@@ -624,7 +643,13 @@ var client = (function(){
             "</form>",
             "Account Login"
         );
+
         document.querySelector("#submit-login").addEventListener("click", function(evt){
+            evt.preventDefault();
+            loginAccount();
+        });
+
+        document.querySelector(".cc-form").addEventListener("submit", function(evt){
             evt.preventDefault();
             loginAccount();
         });
@@ -666,6 +691,11 @@ var client = (function(){
         );
 
         document.querySelector("#submit-account").addEventListener("click", function(evt){
+            evt.preventDefault();
+            createAccount();
+        });
+
+        document.querySelector(".cc-form").addEventListener("submit", function(evt){
             evt.preventDefault();
             createAccount();
         });
