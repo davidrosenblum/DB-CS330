@@ -51,14 +51,23 @@ __Settings.json__ file - created when server is first launched witih default val
 
 ## Database Schema
 
-| Table                  | Schema                                             |
-|------------------------|----------------------------------------------------|
-| cuisines               | {id, name, season, function, weight, volume, tips} |
-| cuisine_associations   | {cuisine_id, association_id, compatibility}        |
-| tastes                 | {id, name}                                         |
-| taste_associations     | {cuisine_id, taste_id}                             |
-| techniques             | {id, name}                                         |
-| technique_associations | {cuisine_id, technique_id}                         |
+| Table                  | Schema                                               |
+|------------------------|------------------------------------------------------|
+| cuisines               | {id, name, season, function, weight, volume, tips}   |
+| cuisine_associations   | {cuisine_id, association_id, compatibility}          |
+| tastes                 | {id, name}                                           |
+| taste_associations     | {cuisine_id, taste_id}                               |
+| techniques             | {id, name}                                           |
+| technique_associations | {cuisine_id, technique_id}                           |
+| accounts               | {account_id, email, first_name, last_name, pro_chef} |                
+| saved_associations     | {account_id, group_id, cuisine_id}                   |
+
+## HTTP Headers
+| Header | Value | Purpose |
+|-|-|-|
+| x-cuisine-crusader | "rjdr" | required for non-search functions |
+| x-session-guid | (server assigned #) | associates a session with an email|
+| x-cc-dev | "darksouls3" | secret header for developer functions
 
 ## REST API
 | URL                                                                     | Description                  | Returns                                        |
@@ -71,7 +80,12 @@ __Settings.json__ file - created when server is first launched witih default val
 | https://cuisine-crusader.herokuapp.com/techniques/search/_SEARCH_       | Technique name search        | ["technique1, "technique2, ..., "techniquesN"] |
 | https://cuisine-crusader.herokuapp.com/techniques/associations/_SEARCH_ | Technique association search | ["associate1", "associate2", ..."associateN"]  |
 
+## Secret Requests
+
+
 ## Client Query Strings
 | Parameter | Value              | Description                                  | Example       |
 |-----------|--------------------|----------------------------------------------|---------------|
 | search    | item name (string) | auto search on page load | ?search=anise |
+|form | anything | auto fills account registration form | ?form=1|
+|login | anything | auto filles login form | ?login=1|

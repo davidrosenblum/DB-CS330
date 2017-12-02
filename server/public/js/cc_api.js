@@ -143,7 +143,7 @@ var CCAPI = (function(){
         ajax({
             url: SERVER_HOST + "accounts/create",
             method: "POST",
-            headers: {"cuisine-crusader": "rjdr"},
+            headers: {"x-cuisine-crusader": "rjdr"},
             data: {
                 "email": email,
                 "password": password,
@@ -159,7 +159,7 @@ var CCAPI = (function(){
         ajax({
             url: SERVER_HOST + "accounts/login",
             method: "POST",
-            headers: {"cuisine-crusader": "rjdr"},
+            headers: {"x-cuisine-crusader": "rjdr"},
             data: {
                 "email": email,
                 "password": password
@@ -170,18 +170,27 @@ var CCAPI = (function(){
 
     var requestProfile = function(sessionGUID, callback){
         ajax({
-            url: SERVER_HOST + "accounts/profile",
+            url: SERVER_HOST + "accounts/profile/get",
             method: "GET",
             headers: {
-                "cuisine-crusader": "rjdr",
-                "session-guid": sessionGUID
+                "x-cuisine-crusader": "rjdr",
+                "x-session-guid": sessionGUID
             },
             callback: callback
         });
     };
 
-    var saveGroup = function(username, password, associations, callback){
-
+    var saveGroup = function(sessionGUID, group, callback){
+        ajax({
+            url: SERVER_HOST + "accounts/profile/set",
+            method: "POST",
+            headers: {
+                "x-cuisine-crusader": "rjdr",
+                "x-session-guid": sessionGUID
+            },
+            data: group,
+            callback: callback
+        });
     };
 
     // change the host
@@ -201,6 +210,7 @@ var CCAPI = (function(){
         createAccount:                  createAccount,
         loginAccount:                   loginAccount,
         requestProfile:                 requestProfile,
+        saveGroup:                      saveGroup,
         formatData:                     formatData,
         setHost:                        setHost
     };
