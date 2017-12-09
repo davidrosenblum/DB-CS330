@@ -168,6 +168,18 @@ var CCAPI = (function(){
         });
     };
 
+    var logoutAccount = function(sessionGUID, callback){
+        ajax({
+            url: SERVER_HOST + "accounts/logout",
+            method: "POST",
+            headers: {
+                "x-cuisine-crusader": "rjdr",
+                "x-session-guid": sessionGUID
+            },
+            callback: callback
+        });
+    };
+
     var requestProfile = function(sessionGUID, callback){
         ajax({
             url: SERVER_HOST + "accounts/profile/get",
@@ -222,6 +234,7 @@ var CCAPI = (function(){
         requestTechniqueAssociations:   requestTechniqueAssociations,
         createAccount:                  createAccount,
         loginAccount:                   loginAccount,
+        logoutAccount:                  logoutAccount,
         requestProfile:                 requestProfile,
         saveGroup:                      saveGroup,
         deleteGroup:                    deleteGroup,

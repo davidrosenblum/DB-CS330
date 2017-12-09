@@ -3,7 +3,8 @@ var client = (function(){
     var resultsContainer, modal, modalBody, modalDarkness;
 
     // sesssion ID from server
-    var sessionGUID = -1;
+    var sessionGUID = -1,
+        emailCookie = null;
 
     // bakset object ("my list")
     var basket = {
@@ -495,8 +496,10 @@ var client = (function(){
         CCAPI.loginAccount(email, password, function(res, status, headers){
             if(status === 200){
                 // email cookie
-                if(headers["set-cookie"]){
-                    document.cookie = headers["set-cookie"]; // email=....
+                if(headers["x-session-email"]){
+                    document.cookie = "email=" + headers["x-session-email"]; // email=....
+                    document.querySelector("#nav-right").style.display = "block";
+                    document.querySelector("#nav-right a:nth-child(1)").innerHTML = headers["x-session-email"];
                 }
                 // session guid
                 if(headers["x-session-guid"]){
@@ -506,9 +509,22 @@ var client = (function(){
             }
             else{
                 // error message
-                appendModal("<div data='account-response'>" + res + "</div>");
+                appendModal("<p data='account-response'>" + res + "</p>");
             }
         });
+    };
+
+    // client terminates session and informs server
+    var logoutAccount = function(){
+        if(sessionGUID !== -1){
+            sessionGUID = -1;
+
+            CCAPI.logoutAccount(sessionGUID, function(res, status){
+                // do something?
+            });
+
+            document.querySelector("#nav-right").style.display = "none";
+        }
     };
 
     // shows the instructions modal
@@ -583,14 +599,18 @@ var client = (function(){
 
             var container = document.createElement("div");
             container.setAttribute("data-group", groupID);
+            container.classList.add("cc-group-container");
 
             container.innerHTML += "<h3>Group " + groupID + "</h3>";
-            container.innerHTML += "<button data-name='import' data-group='" + groupID + "'>Import</button>";
-            container.innerHTML += "<button data-name='delete' data-group='" + groupID + "'>Delete</button>";
+            container.innerHTML += "<button class='cc-btn-add' data-name='import' data-group='" + groupID + "'>Import</button>";
+            container.innerHTML += "<button class='cc-btn-remove' data-name='delete' data-group='" + groupID + "'>Delete</button>";
+            container.innerHTML += "<hr width='85%'>";
 
             for(var i = 0; i < group.length; i++){
                 container.appendChild(group[i].figure)
             }
+
+            container.innerHTML += "<br>"; // for spacing on bottom
 
             appendModal(container);
         }
@@ -631,11 +651,11 @@ var client = (function(){
             "<form class='cc-form' action='#'>" +
                 "<div class='form-group'>" +
                     "<label for='login-email-input'>Email</label>" +
-                    "<input type='email' id='login-email-input' class='form-control' required='required'>" +
+                    "<input type='email' id='login-email-input' class='form-control' required='required' placeholder='username'>" +
                 "</div>" +
                 "<div class='form-group'>" +
                     "<label for='login-password-input'>Password</label>" +
-                    "<input type='password' id='login-password-input' class='form-control' required='required'>" +
+                    "<input type='password' id='login-password-input' class='form-control' required='required' placeholder='password'>" +
                 "</div>" +
                 "<div class='form-group'>" +
                     "<button class='btn' id='submit-login'>Submit</button>" +
@@ -653,6 +673,10 @@ var client = (function(){
             evt.preventDefault();
             loginAccount();
         });
+
+        if(emailCookie){
+            document.querySelector("#login-email-input").value = emailCookie;
+        }
     };
 
     var showSignupModal = function(){
@@ -660,23 +684,23 @@ var client = (function(){
             "<form class='cc-form'>" +
                 "<div class='form-group'>" +
                     "<label for='account-firstname-input'>First Name</label>" +
-                    "<input id='account-firstname-input' class='form-control' required='required'>" +
+                    "<input id='account-firstname-input' class='form-control' required='required' placeholder='first name'>" +
                 "</div>" +
                 "<div class='form-group'>" +
                     "<label for='account-lastname-input'>Last Name</label>" +
-                    "<input id='account-lastname-input' class='form-control' required='required'>" +
+                    "<input id='account-lastname-input' class='form-control' required='required' placeholder='last name'>" +
                 "</div>" +
                 "<div class='form-group'>" +
                     "<label for='account-email-input'>Email</label>" +
-                    "<input type='email' id='account-email-input' class='form-control' required='required'>" +
+                    "<input type='email' id='account-email-input' class='form-control' required='required' placeholder='email'>" +
                 "</div>" +
                 "<div class='form-group'>" +
                     "<label for='account-password-input'>Password</label>" +
-                    "<input type='password' id='account-password-input' class='form-control' required='required'>" +
+                    "<input type='password' id='account-password-input' class='form-control' required='required' placeholder='password'>" +
                 "</div>" +
                 "<div class='form-group'>" +
                     "<label for='account-confirm-password-input'>Confirm Password</label>" +
-                    "<input type='password' id='account-confirm-password-input' class='form-control' required='required'>" +
+                    "<input type='password' id='account-confirm-password-input' class='form-control' required='required' placeholder='confirm password'>" +
                 "</div>" +
                 "<div class='form-group'>" +
                     "<label for='account-prochef-input'>Professional Chef</label>" +
@@ -775,10 +799,21 @@ var client = (function(){
         document.querySelector("#profile-btn").addEventListener("click", showProfileModal);
         document.querySelector("#signup-btn").addEventListener("click", showSignupModal);
         document.querySelector("#help-btn").addEventListener("click", showHelp);
+        document.querySelector("#logout-btn").addEventListener("click", logoutAccount);
+        document.querySelector("#nav-right a:nth-child(1)").addEventListener("click", showProfileModal);
 
         // basket buttons
         document.querySelector("#basket-clear-btn").addEventListener("click", clearBasket);
         document.querySelector("#basket-export-btn").addEventListener("click", exportBasket);
+
+        // extract cookies
+        var cookies = document.cookie.split("; ");
+        for(var i = 0; i < cookies.length; i++){
+            if(cookies[i].indexOf("email=") > -1){
+                emailCookie = cookies[i].split("=")[1];
+                break;
+            }
+        }
 
         // load last basket
         loadLocalBasket();
