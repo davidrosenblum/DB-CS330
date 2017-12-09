@@ -114,6 +114,23 @@ app.route("/accounts/login*").post((req, res) => {
     handleLoginRequest(req, res);
 });
 
+app.route("/accounts/logout*").post((req, res) => {
+    if(isMissingHeader(req, res)){
+        return;
+    }
+
+    if(isMissingSessionGUID(req, res)){
+        return;
+    }
+
+    // delete the session
+    let sessionGUID = req.headers["x-session-guid"]
+    delete guids[sessionGUID];
+
+    res.writeHead(200);
+    res.end("Logout complete.");
+});
+
 app.route("/accounts/profile/get*").get((req, res) => {
     // enforce requried header
     if(isMissingHeader(req, res)){
@@ -377,7 +394,7 @@ let handleLoginRequest = (req, res) => {
                 setTimeout(() => delete guids[guid], SESSION_DURATION);
 
                 res.writeHead(200, {
-                    "set-cookie": "email=" + data.email,
+                    "x-session-email": data.email,
                     "x-session-guid": guid
                 });
                 res.end("Successful login!");

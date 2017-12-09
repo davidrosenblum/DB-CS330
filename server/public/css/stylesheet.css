@@ -176,6 +176,25 @@ header{
     margin: auto;
 }
 
+.cc-form input{
+    border: 1px solid black;
+    border-radius: 4px;
+}
+
+.cc-group-container{
+    margin: auto;
+    width: 80%;
+    border: 1px solid black;
+    border-radius: 4px;
+    background-color: white;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+
+#nav-right{
+    display: none;
+}
+
 ::selection{
     background-color: black;
     color: white;
