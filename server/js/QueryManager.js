@@ -49,7 +49,7 @@ let QueryManager = class QueryManager{
             allSent = false;
 
         this.query(
-            "SELECT COUNT(DISTINCT group_id) + 1 AS 'group_id' FROM saved_associations " +
+            "SELECT MAX(group_id) + 1 AS 'group_id' FROM saved_associations " +
             "WHERE account_id = (" +
                 "SELECT account_id FROM accounts " +
                 "WHERE email = '" + email + "'" +
@@ -81,34 +81,6 @@ let QueryManager = class QueryManager{
                 }
             }
         );
-
-        return;
-        for(let name of cuisines){
-            this.query(
-                "INSERT INTO saved_associations(account_id, group_id, cuisine_id) " +
-                "VALUES(" +
-                    "(SELECT account_id FROM accounts WHERE email = '" + email + "'), " +
-                    "(" +
-                        "SELECT COUNT(DISTINCT group_id) + 1 " +
-                        "FROM (SELECT * FROM saved_associations) sa " +
-                        "WHERE account_id = (" +
-                            "SELECT account_id FROM accounts " +
-                            "WHERE email = '" + email + "'" +
-                        ")" +
-                    "), " +
-                    "(SELECT id FROM cuisines WHERE name = '" + name + "')" +
-                ")",
-                (err) => {
-                    if(err) errors.push(err);
-                    resolved++;
-
-                    if(allSent && resolved === cuisines.length){
-                        callback(errors.length === 0 ? null : errors);
-                    }
-                }
-            );
-        }
-        allSent = true;
     }
 
     deleteAssociationsGroup(email, groupID, callback){
