@@ -27,6 +27,18 @@ var client = (function(){
 
                 saveLocalBasket();
 
+                if(name in displayFigures){
+                    //displayFigures[name].showRemove();
+                }
+                if(name in groupFigures){
+                    for(var i = 0; i < groupFigures[name].length; i++){
+                        groupFigures[name][i].showRemove();
+                    }
+                }
+                if(name in commonFigures){
+                    commonFigures[name].showRemove();
+                }
+
                 commonAssociationManager.store(name);
             }
         },
@@ -39,7 +51,15 @@ var client = (function(){
                 delete this.cuisines[name];
 
                 if(name in displayFigures){
-                    displayFigures[name].showAdd();
+                    //displayFigures[name].showAdd();
+                }
+                if(name in groupFigures){
+                    for(var i = 0; i < groupFigures[name].length; i++){
+                        groupFigures[name][i].showAdd();
+                    }
+                }
+                if(name in commonFigures){
+                    commonFigures[name].showAdd();
                 }
 
                 if(element.innerHTML.length === 0){
@@ -125,9 +145,13 @@ var client = (function(){
 
             // for each association... create a display figure
             if(this.associations){
+                commonFigures = {};
+
                 for(var i = 0; i < this.associations.length; i++){
                     var df = new DisplayFigure(this.associations[i]);
                     element.appendChild(df.figure);
+
+                    commonFigures[df.name] = df;
                 }
 
                 // no association
@@ -154,6 +178,7 @@ var client = (function(){
         });
 
         this.removeBtn.addEventListener("click", function(evt){
+            console.log("REMOVE");
             that.showAdd();
             basket.remove(name);
         });
@@ -177,6 +202,11 @@ var client = (function(){
 
     // dictionary of all display figures, prevents querying for them later
     var displayFigures = {};
+
+    var commonFigures = {};
+
+    // dict of all group figures, button fixes
+    var groupFigures = {};
 
     // submits the search to the server (triggered by enter on search or search button click)
     var search = function(){
@@ -505,6 +535,12 @@ var client = (function(){
                 if(headers["x-session-guid"]){
                     sessionGUID = headers["x-session-guid"];
                     showProfileModal(); // this time it will show the profile
+
+                    // show save button if a bakset is open
+                    for(c in basket.cuisines){
+                        document.querySelector("#basket-export-btn").style.display = "inline";
+                        break;
+                    }
                 }
             }
             else{
@@ -579,6 +615,9 @@ var client = (function(){
             return;
         }
 
+        // reset group figures
+        groupFigures = {};
+
         // convert [{group_id: 1, name: "cuisine"}] to {1: ["cuisine"]}
         // sorts
         var groups = {};
@@ -591,7 +630,17 @@ var client = (function(){
             }
 
             var group = groups[groupID];
-            group.push(new DisplayFigure(name));
+
+            var df = new DisplayFigure(name);
+            group.push(df);
+
+            if(name in groupFigures === false){
+                groupFigures[name] = [df];
+            }
+            else{
+                groupFigures[name].push(df);
+            }
+
         }
 
         for(var groupID in groups){
@@ -610,7 +659,7 @@ var client = (function(){
                 container.appendChild(group[i].figure)
             }
 
-            container.innerHTML += "<br>"; // for spacing on bottom
+            container.appendChild(document.createElement("br")) // for spacing on bottom
 
             appendModal(container);
         }
@@ -857,6 +906,7 @@ var client = (function(){
     // return public methods
     return {
         basket: () => basket,
-        associations: () => commonAssociationManager.associations
+        associations: () => commonAssociationManager.associations,
+        groupFigures: () => groupFigures
     };
 })();
