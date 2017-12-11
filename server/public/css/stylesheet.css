@@ -159,8 +159,30 @@ header{
     margin: 3px;
 }
 
-.cc-btn-info:hover, .cc-btn-add:hover, .cc-btn-remove:hover{
+.cc-btn-search{
+    color: black;
+    border: 1px solid black;
+    border-radius: 4px;
+    background: linear-gradient(180deg, deepskyblue, royalblue);
+    margin: 3px;
+}
+
+.cc-btn-info:hover, .cc-btn-add:hover, .cc-btn-remove:hover, .cc-btn-search:hover{
     background: white;
+}
+
+.cc-recipe-link{
+    color: black;
+    font-weight: bold;
+    transition: 0.4s;
+}
+
+.cc-recipe-link:hover{
+    color: darkred;
+}
+
+.cc-info-tbl{
+    width: 75%;
 }
 
 #basket-clear-btn, #basket-export-btn{
