@@ -294,7 +294,10 @@ var client = (function(){
 
         // create the table
         var tbl = document.createElement("table");
-        tbl.setAttribute("class", "table");
+        tbl.classList.add("table");
+        tbl.classList.add("cc-info-tbl");
+        tbl.setAttribute("align", "center");
+
 
         var tbody = document.createElement("tbody");
         tbl.appendChild(tbody);
@@ -348,6 +351,7 @@ var client = (function(){
                 if(status !== 400){
                     // create and display the info table
                     setOutput(createInfoTable(info));
+                    appendOutput(createSearchButton(name));
 
                     // request associations (there might be none!) and append the list
                     CCAPI.requestCuisineAssociations(name, function(associations, status){
@@ -373,6 +377,27 @@ var client = (function(){
         removeBtn.innerHTML = "Remove";
         removeBtn.classList.add("cc-btn-remove");
         return removeBtn;
+    };
+
+    // creates a search button
+    var createSearchButton = function(name){
+        /*var searchBtn = document.createElement("button");
+        searchBtn.innerHTML = "Search";
+        searchBtn.classList.add("cc-btn-search");
+        searchBtn.addEventListener("click", function(evt){
+            window.open("http://allrecipes.com/search/results/?wt=" + name);
+        });
+        return searchBtn;*/
+        var p = document.createElement("p");
+
+        var link = document.createElement("a");
+        link.classList.add("cc-recipe-link");
+        link.innerHTML = "Search for \"" + name + "\" recipes";
+        link.setAttribute("href", "http://allrecipes.com/search/results/?wt=" + name);
+        link.setAttribute("target", "_blank");
+
+        p.appendChild(link);
+        return p;
     };
 
     // wipes the results container and contains an html string OR html element
