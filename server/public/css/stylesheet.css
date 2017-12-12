@@ -231,3 +231,17 @@ header{
     background-color: black;
     color: white;
 }
+
+header p {
+    font-size: 1.6em;
+}
+
+footer {
+    font-size: 1.1em;
+    color: white;
+    text-shadow: 2px 2px 5px black;
+}
+
+footer a {
+    color: lightblue;
+}
