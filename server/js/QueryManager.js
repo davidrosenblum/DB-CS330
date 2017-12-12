@@ -175,11 +175,11 @@ let QueryManager = class QueryManager{
     // returns the letter the associations table is completed up to
     queryAssociationCompleteness(callback) {
         this.query(
-            "SELECT SUBSTRING(name, 1, 1)" +
-            "FROM cuisine c" + 
-            "JOIN cuisine_associations ca" +
-            "ON c.id = ca.cuisine_id" +
-            "ORDER BY name DESC" +
+            "SELECT SUBSTRING(name, 1, 1) AS 'highest_letter'" +
+            "FROM cuisines c " +
+            "JOIN cuisine_associations ca " +
+            "ON c.id = ca.cuisine_id " +
+            "ORDER BY name DESC " +
             "LIMIT 1 ;",
             callback
         );
@@ -188,8 +188,8 @@ let QueryManager = class QueryManager{
     // returns the number of records in the cusine table for each letter
     queryCuisineCompleteness(callback) {
         this.query(
-            "SELECT SUBSTRING(name, 1, 1), COUNT(SUBSTRING(name, 1, 1))" +
-            "FROM cuisine" +
+            "SELECT SUBSTRING(name, 1, 1) AS 'letter', COUNT(SUBSTRING(name, 1, 1)) AS 'count'" +
+            "FROM cuisines " +
             "GROUP BY SUBSTRING(name, 1, 1) ;",
             callback
         )

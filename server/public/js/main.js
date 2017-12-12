@@ -923,6 +923,30 @@ var client = (function(){
         var versionLabel = document.createElement("p");
         versionLabel.innerHTML = "v" + VERSION;
         document.querySelector("footer").appendChild(versionLabel);
+
+        console.log("REQ STATUS");
+        CCAPI.requestDatabaseStatus(function(res, status){
+            console.log("RESPONSE");
+            if(status === 200){
+                try{
+                    var json = JSON.parse(res);
+                    console.log(json);
+                    document.querySelector("#cuisine-associations").innerHTML =" " + json.associationCompleteness["highest_letter"];
+
+                    var tbl = document.querySelector("#cuisine-table");
+
+                    for(var i = 0; i < json.cuisineCompleteness.length; i++){
+                        var c = json.cuisineCompleteness[i];
+                        console.log(c);
+                        tbl.innerHTML += "<tr><td>" + c.letter+  "</td><td>" + c.count + "</td></tr>";
+
+                    }
+                }
+                catch(err){
+                    console.log(err);
+                }
+            }
+        });
     };
     window.addEventListener("load", init);
 

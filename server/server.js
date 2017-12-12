@@ -35,6 +35,38 @@ app.route("/database").get((req, res) => {
     res.end("Database state = " + database.state);
 });
 
+app.route("/database/status*").get((req, res) => {
+    let allSent = false, numResponded = 0;
+
+    let response = {
+        associationCompleteness: null,
+        cuisineCompleteness: null
+    };
+
+    let checkDone = () => {
+        if(allSent && numResponded === 2){
+            res.writeHead(200);
+            res.end(JSON.stringify(response, null, 4));
+        }
+    };
+
+    queryManager.queryAssociationCompleteness((err, resp) => {
+        if(!err) response.associationCompleteness = resp[0];
+        else console.log(err);
+        numResponded++;
+        checkDone();
+    });
+
+    queryManager.queryCuisineCompleteness((err, resp) => {
+        if(!err) response.cuisineCompleteness = resp;
+        else console.log(err);
+        numResponded++;
+        checkDone();
+    });
+
+    allSent = true;
+});
+
 app.route("/cuisines/info*").get((req, res) => {
     // extract search
     let search = extractSearchValue(req.url);

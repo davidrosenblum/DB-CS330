@@ -39,7 +39,7 @@
             <header class="text-center">
                 <div class="banner-container">
                     <img id="banner" src="images/cuisine_crusader.png" title="Cuisine Crusader" alt="Cuisine Crusader"/>
-                    <p>The Interactive <a href="https://www.karenandandrew.com/books/the-flavor-bible/">Flavor Bible</a>!</p>
+                    <p>The Interactive <a href="https://www.karenandandrew.com/books/the-flavor-bible/" target="_blank">Flavor Bible</a>!</p>
                 </div>
             </header>
             <div id="search-row" class="row">
@@ -93,13 +93,23 @@
             </div>
             <footer class="container">
                 <hr>
-                <p>Robert Juall &amp; David Rosenblum  &copy;2017 | 
-                      <a href="https://www.karenandandrew.com/books/the-flavor-bible/">The Flavor Bible</a> is &copy;Karen Page and Andrew Dornenburg  
+                <p>Robert Juall &amp; David Rosenblum  &copy;2017 |
+                      <a href="https://www.karenandandrew.com/books/the-flavor-bible/" target="_blank">The Flavor Bible</a> is &copy;Karen Page and Andrew Dornenburg
                       and is used here for educational purposes.</p>
                       <div id="database-status">
                           <p>The Database is Under Construction!</p>
-                          <p>'cuisine_associations table complete through the letter: </p>
+                          <p>'cuisine_associations table complete through the letter:<span id="cuisine-associations"></span></p>
                           <p>Database contains these records in the 'cuisine' table:</p>
+                          <p>
+                            <table id="cuisine-table" class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Letter</th>
+                                        <th>Count</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                          </p>
                       </div>
             </footer>
         </main>
