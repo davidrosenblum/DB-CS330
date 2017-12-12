@@ -218,6 +218,14 @@ var CCAPI = (function(){
         });
     };
 
+    var requestDatabaseStatus = function(callback){
+        ajax({
+            url: SERVER_HOST + "database/status",
+            method: "GET",
+            callback: callback
+        });
+    };
+
     // change the host
     var setHost = function(host){
         SERVER_HOST = host;
@@ -238,6 +246,7 @@ var CCAPI = (function(){
         requestProfile:                 requestProfile,
         saveGroup:                      saveGroup,
         deleteGroup:                    deleteGroup,
+        requestDatabaseStatus:          requestDatabaseStatus,
         formatData:                     formatData,
         setHost:                        setHost
     };
