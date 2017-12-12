@@ -239,9 +239,18 @@ header p {
 footer {
     font-size: 1.1em;
     color: white;
-    text-shadow: 2px 2px 5px black;
+    text-shadow:
+   -1px -1px 1px #000,
+    1px -1px 1px #000,
+   -1px  1px 1px #000,
+    1px  1px 1px #000;
 }
 
 footer a {
     color: lightblue;
+    transition: 0.33s;
+}
+
+footer a:hover{
+    color: red;
 }
