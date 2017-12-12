@@ -6,6 +6,8 @@ var client = (function(){
     var sessionGUID = -1,
         emailCookie = null;
 
+    var VERSION = "1.0.0";
+
     // bakset object ("my list")
     var basket = {
         cuisines:   {},
@@ -916,6 +918,11 @@ var client = (function(){
 
         // minigame easter egg!
         //document.querySelector("footer").onclick = createMinigame;
+
+        // version label
+        var versionLabel = document.createElement("p");
+        versionLabel.innerHTML = "v" + VERSION;
+        document.querySelector("footer").appendChild(versionLabel);
     };
     window.addEventListener("load", init);
 
@@ -925,6 +932,7 @@ var client = (function(){
         " /\t\t\t\t\t\t\t\t\t   \\\n" +
         "|\t\t\tCUISINE CRUSADER\t\t\t|\n" +
         "|\t\t  ----[  RJ/DR  ]----\t\t\t|\n" +
+        "|\t\t  ----[  " + VERSION + "  ]----\t\t\t|\n" +
         " \\_____________________________________/"
     );
 
