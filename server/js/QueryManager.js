@@ -61,7 +61,7 @@ let QueryManager = class QueryManager{
                             "INSERT INTO saved_associations(account_id, group_id, cuisine_id) " +
                             "VALUES(" +
                                 "(SELECT account_id FROM accounts WHERE email = '" + email + "'), " +
-                                rows[0].group_id + ", " +
+                                ((typeof rows[0].group_id === "number") ? rows[0].group_id : 1) + ", " +
                                 "(SELECT id FROM cuisines WHERE name = '" + name + "')" +
                             ")",
                             (err) => {
@@ -77,6 +77,7 @@ let QueryManager = class QueryManager{
                     allSent = true;
                 }
                 else{
+                    console.log(err);
                     callback([err]);
                 }
             }
