@@ -172,6 +172,29 @@ let QueryManager = class QueryManager{
         );
     }
 
+    // returns the letter the associations table is completed up to
+    queryAssociationCompleteness(callback) {
+        this.query(
+            "SELECT SUBSTRING(name, 1, 1)" +
+            "FROM cuisine c" + 
+            "JOIN cuisine_associations ca" +
+            "ON c.id = ca.cuisine_id" +
+            "ORDER BY name DESC" +
+            "LIMIT 1 ;",
+            callback
+        );
+    }
+
+    // returns the number of records in the cusine table for each letter
+    queryCuisineCompleteness(callback) {
+        this.query(
+            "SELECT SUBSTRING(name, 1, 1), COUNT(SUBSTRING(name, 1, 1))" +
+            "FROM cuisine" +
+            "GROUP BY SUBSTRING(name, 1, 1) ;",
+            callback
+        )
+    }
+
     // create the database tables
     createTables(){
         // create techniques table
