@@ -587,6 +587,7 @@ var client = (function(){
             });
 
             document.querySelector("#nav-right").style.display = "none";
+            document.querySelector("#basket-export-btn").style.display = "none";
         }
     };
 
